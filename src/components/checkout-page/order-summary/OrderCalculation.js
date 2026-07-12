@@ -66,7 +66,23 @@ const OrderCalculation = (props) => {
         extraPackagingCharge,
         distanceLoading,
         taxData,
-        handleCouponDiscount
+        handleCouponDiscount,
+        selectedDeliveryOption,
+        proSavedAmount = 0,
+        // Empty string falls back to the legacy "Pro User Discount" copy so
+        // older call sites that don't pass this prop still render correctly.
+        proSavedLabel = '',
+        // Drives placement of the Pro savings row:
+        //   'discount'     → after the Discount row
+        //   'coupon'       → after the Voucher Discount row
+        //   'delivery_fee' → after the Delivery fee row
+        // Anything else (or missing) falls back to the delivery-fee slot so
+        // legacy callers keep their old placement.
+        proBenefitType = '',
+        // Suppresses the Pro savings row when delivery_fee + full_free —
+        // the Delivery row already shows "Free", so an extra "(-) amount"
+        // line would double-count visually.
+        proOfferType = '',
     } = props
     const dispatch = useDispatch()
     const { couponType, zoneData } = useSelector(
@@ -78,6 +94,7 @@ const OrderCalculation = (props) => {
     const { t } = useTranslation()
     const [freeDelivery, setFreeDelivery] = useState('false')
     const theme = useTheme()
+console.log({proSavedAmount});
 
     let currencySymbol
     let currencySymbolDirection
@@ -112,7 +129,12 @@ const OrderCalculation = (props) => {
         userData?.discount_amount_type
     )
 
-    const totalPrice = getCalculatedTotal(
+    const deliveryOptionSurcharge =
+        orderType === 'delivery'
+            ? Number(selectedDeliveryOption?.surcharge) || 0
+            : 0
+
+    const baseTotalPrice = getCalculatedTotal(
         cartList,
         couponDiscount,
         restaurantData,
@@ -132,6 +154,7 @@ const OrderCalculation = (props) => {
         taxData?.tax_status === 'excluded' ? taxData?.tax_amount : 0
 
     )
+    const totalPrice = baseTotalPrice + (couponDiscount?.coupon_type === 'free_delivery' ? 0 : deliveryOptionSurcharge)
     const handleDeliveryFee = () => {
         let price = getDeliveryFees(
             restaurantData,
@@ -146,6 +169,8 @@ const OrderCalculation = (props) => {
             destination,
             tempExtraCharge
         )
+        console.log({price});
+        
         if (price === 0) {
             return <Typography variant="h4">{t('Free')}</Typography>
         } else {
@@ -171,6 +196,8 @@ const OrderCalculation = (props) => {
             )
         }
     }
+    console.log({proSavedAmount});
+    
     const handleOrderAmount = () => {
         let totalAmount = 0
         if (subscriptionOrderCount > 0) {
@@ -180,21 +207,59 @@ const OrderCalculation = (props) => {
         } else {
             totalAmount = totalPrice
         }
+        const proDiscount = Number(proSavedAmount) || 0
+        const totalAfterPro = Math.max(0, totalAmount - proDiscount)
 
-        dispatch(setTotalAmount(totalAmount))
+        dispatch(setTotalAmount(totalAfterPro))
         return getAmount(
             userData?.is_valid_for_discount
-                ? totalAmount - referDiscount
-                : totalAmount,
+                ? totalAfterPro - referDiscount
+                : totalAfterPro,
             currencySymbolDirection,
             currencySymbol,
             digitAfterDecimalPoint
         )
     }
 
+    const proSavedAmountNumber = Number(proSavedAmount) || 0
+    console.log({proSavedAmountNumber,proSavedLabel});
+    
+    const isFullFreeDelivery =
+        proBenefitType === 'delivery_fee' && proOfferType === 'full_free'
+        console.log({isFullFreeDelivery});
+        
+    const renderProSavingsRow = () =>
+        proSavedAmountNumber > 0 && !isFullFreeDelivery ? (
+            <>
+                <Grid item md={8} xs={8}>
+                    {proSavedLabel || t('Pro User Discount')}
+                </Grid>
+                <Grid item md={4} xs={4} align="right">
+                    <Stack
+                        width="100%"
+                        direction="row"
+                        alignItems="center"
+                        justifyContent="flex-end"
+                        spacing={0.5}
+                    >
+                        <Typography variant="h4">{'(-)'}</Typography>
+                        <Typography variant="h4">
+                            {getAmount(
+                                proSavedAmount,
+                                currencySymbolDirection,
+                                currencySymbol,
+                                digitAfterDecimalPoint
+                            )}
+                        </Typography>
+                    </Stack>
+                </Grid>
+            </>
+        ) : null
+
     const handleOrderAmountWithoutSubscription = () => {
+        const proDiscount = Number(proSavedAmount) || 0
         return getAmount(
-            totalPrice,
+            Math.max(0, totalPrice - proDiscount),
             currencySymbolDirection,
             currencySymbol,
             digitAfterDecimalPoint
@@ -297,14 +362,49 @@ const OrderCalculation = (props) => {
                         </Typography>
                     </Stack>
                 </Grid>
+                {proBenefitType === 'discount' && renderProSavingsRow()}
                 {couponDiscount ? (
                     <>
                         <Grid item md={8} xs={8}>
-                            {t('Voucher Discount')}
+                            <Stack
+                                direction="row"
+                                alignItems="center"
+                                spacing={0.75}
+                                flexWrap="wrap"
+                            >
+                                <span>{t('Voucher Discount')}</span>
+                                {couponDiscount?.coupon_type ===
+                                'pro_customer' ? (
+                                    <Stack
+                                        direction="row"
+                                        alignItems="center"
+                                        sx={{
+                                            px: 0.75,
+                                            py: 0.25,
+                                            borderRadius: '4px',
+                                            background:
+                                                'linear-gradient(90deg, #A78BFA 0%, #8B5CF6 100%)',
+                                        }}
+                                    >
+                                        <Typography
+                                            sx={{
+                                                fontSize: '10px',
+                                                fontWeight: 600,
+                                                color: '#fff',
+                                                letterSpacing: '0.3px',
+                                            }}
+                                        >
+                                            {t('Pro Customer')}
+                                        </Typography>
+                                    </Stack>
+                                ) : null}
+                            </Stack>
                         </Grid>
                         <Grid item md={4} xs={4} align="right">
                             {couponDiscount.coupon_type === 'free_delivery' ? (
-                                <p>{t('Free Delivery')}</p>
+                                <Typography variant="h4" fontWeight="600">
+                                    {t('Free Delivery')}
+                                </Typography>
                             ) : (
                                 <Stack
                                     direction="row"
@@ -325,6 +425,7 @@ const OrderCalculation = (props) => {
                         </Grid>
                     </>
                 ) : null}
+                {proBenefitType === 'coupon' && renderProSavingsRow()}
                 {referDiscount ? (
                     <>
                         <Grid item md={8} xs={8}>
@@ -477,7 +578,35 @@ const OrderCalculation = (props) => {
                             {!distanceLoading ? (
                                 <>
                                     {orderType === 'delivery' ? (
-                                        couponDiscount ? (
+                                        isFullFreeDelivery &&
+                                        proSavedAmountNumber > 0 ? (
+                                            // Pro "full_free" delivery is
+                                            // active and applied — surface it
+                                            // here so the user sees the benefit
+                                            // even though the dedicated Pro
+                                            // savings row is suppressed to
+                                            // avoid double-counting.
+                                            <Stack
+                                                direction="row"
+                                                alignItems="center"
+                                                justifyContent="flex-end"
+                                                spacing={0.5}
+                                            >
+                                                <Typography
+                                                    fontWeight="700"
+                                                    color="success.main"
+                                                >
+                                                    {t('Free')}
+                                                </Typography>
+                                                <Typography
+                                                    fontSize="11px"
+                                                    fontWeight={600}
+                                                    color="success.main"
+                                                >
+                                                    ({t('Pro')})
+                                                </Typography>
+                                            </Stack>
+                                        ) : couponDiscount ? (
                                             couponDiscount?.coupon_type ===
                                             'free_delivery' ? (
                                                 <Typography fontWeight="700">
@@ -503,6 +632,53 @@ const OrderCalculation = (props) => {
                         </Grid>
                     </>
                 )}
+
+                {(proBenefitType === 'delivery_fee' ||
+                    (proBenefitType !== 'discount' &&
+                        proBenefitType !== 'coupon')) &&
+                    renderProSavingsRow()}
+
+                {selectedDeliveryOption &&
+                    selectedDeliveryOption.deliveryType !== 'standard' &&
+                    orderType === 'delivery' &&
+                    couponDiscount?.coupon_type !== 'free_delivery' &&
+                    deliveryOptionSurcharge !== 0 && (
+                        <>
+                            <Grid item md={8} xs={8}>
+                                <Typography
+                                    component="span"
+                                    color={theme.palette.neutral[1000]}
+                                    fontSize="15px"
+                                >
+                                    {selectedDeliveryOption.deliveryType === 'express'
+                                        ? t('Express Delivery')
+                                        : t('Slightly Delay Delivery')}{' '}
+                                </Typography>
+                            </Grid>
+                            <Grid item md={4} xs={4} align="right">
+                                <Stack
+                                    direction="row"
+                                    alignItems="center"
+                                    justifyContent="flex-end"
+                                    spacing={0.5}
+                                >
+                                    <Typography variant="h4">
+                                        {selectedDeliveryOption.deliveryType === 'express'
+                                            ? '(+)'
+                                            : '(-)'}
+                                    </Typography>
+                                    <Typography variant="h4">
+                                        {getAmount(
+                                            Math.abs(deliveryOptionSurcharge),
+                                            currencySymbolDirection,
+                                            currencySymbol,
+                                            digitAfterDecimalPoint
+                                        )}
+                                    </Typography>
+                                </Stack>
+                            </Grid>
+                        </>
+                    )}
 
                 <CustomDivider />
                 {subscriptionOrderCount > 0 && (
@@ -672,7 +848,7 @@ const OrderCalculation = (props) => {
                 ) : (
                     ''
                 )}
-                <Grid md={12}>
+                <Grid xs={12} md={12}>
                     <PlaceOrder
                         usePartialPayment={usePartialPayment}
                         placeOrder={placeOrder}

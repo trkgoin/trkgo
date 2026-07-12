@@ -12,10 +12,10 @@ const neutral = {
     1000: '#141313',
     1100: '#FBFBFB',
     1200: '#4B566B',
-    1300: '#E200744D',
+    1300: '#EF78224D',
     1400: 'rgba(255, 255, 255, 0.8)',
-    1500: 'rgba(226, 0, 116, 0.3)',
-    1600: '#FFE6F3',
+    1500: 'rgba(239, 120, 34, 0.3)',
+    1600: '#FFEBDD',
     1700: '#fff5cf',
     1800: '#FCFCFC',
 }
@@ -26,11 +26,17 @@ const table = {
 }
 const paperBoxShadow = '#E5EAF1'
 const sectionBg = '#F5F6F8'
+// const footerTopBg = '#3e4655'
 const footerAppBg = '#414141'
 const footerTopBgColor = '#00000050'
 const footerCenterBg = '#2f3645'
 const footerMiddleBg = '#343c4d'
 const nonVeg = '#EE7878'
+const offerChip = {
+    bg: '#FDE7EF',
+    text: '#BE185D',
+    icon: '#EC4899',
+}
 const cardBackground1 = '#FFFFFF'
 const cardBackground2 = '#FFFFFF'
 
@@ -51,32 +57,29 @@ const background = {
 const newsletterBG = '#2287FD'
 
 const divider = '#E6E8F0'
-
-// BRAND PRIMARY COLOR
+// main: '#EF7822',
+// secondary main: '#ff903f',
 const primary = {
-    main: '#E20074',
-    light: 'rgba(226, 0, 116, 0.60)',
-    dark: '#9B004D',
+    main: '#FF7918',
+    light: 'rgba(255, 121, 24, 0.60)',
+    dark: '#a3460a',
     contrastText: '#FFFFFF',
-    midPrimary: '#FFE6F3',
+    midPrimary: ' #FFF5ED',
     overLay: '#000000',
 }
-
 const searchBoxBg = primary.main
-
 const secondary = {
-    main: '#B3005A',
-    light: '#FF4DA3',
-    semiLight: '#FFF0F7',
-    dark: '#7A003E',
+    main: '#934916',
+    light: '#db5c00',
+    semiLight: '#FFFAF6',
+    dark: '#a2684c',
     contrastText: '#FFFFFF',
 }
-
 const whiteContainer = {
     main: '#F9FAFC',
-    light: '#E20074',
-    dark: '#B3005A',
-    contrastText: '#E20074',
+    light: '#EF7822',
+    dark: '#ff903f',
+    contrastText: '#EF7822',
 }
 const whiteText = {
     main: '#FFFFFF',
@@ -153,7 +156,7 @@ export const lightThemeOptions = {
                 root: {
                     color: '#FFFFFF',
                     '&.MuiButton-text': {
-                        color: primary.main,
+                        color: '#EF7822',
                     },
                 },
             },
@@ -161,9 +164,11 @@ export const lightThemeOptions = {
         MuiSkeleton: {
             styleOverrides: {
                 root: {
-                    background: skeletonColor,
+                    background:
+                        'linear-gradient(78.58deg, #F5F6F8 3.23%, #FBFBFB 53.13%, #F6F7F8 100%)',
                     '&::after': {
-                        background: skeletonColorAfter,
+                        background:
+                            'linear-gradient(78.58deg, #F5F6F8 3.23%, #FDFDFD 53.13%, #F6F7F8 100%)',
                     },
                 },
             },
@@ -239,19 +244,32 @@ export const lightThemeOptions = {
                 },
             },
         },
+        // MuiTable: {
+        //   styleOverrides: {
+        //     root: {
+        //       boxShadow: `3px 6px 26px 5px rgba(0,0,0,0.34) !important`,
+        //     },
+        //   },
+        // },
         MuiTableRow: {
             styleOverrides: {
                 root: {
                     borderBottom: `2px solid ${neutral[200]}`,
+                    // borderRadius: '20%',
                     borderCollapse: `separate !important`,
+                    // boxShadow: `0px 2px 3px -1px rgba(0,0,0,0.36)`,
                     '&:last-child td, &:last-child th': { border: 0 },
                     whiteSpace: 'nowrap',
                 },
             },
         },
+        //boxShadow: `0 3px 10px rgb(0 0 0 / 0.2)`,
+
         MuiTableCell: {
             styleOverrides: {
-                root: {},
+                root: {
+                    //backgroundColor: 'red',
+                },
             },
         },
         MuiTableHead: {
@@ -260,17 +278,20 @@ export const lightThemeOptions = {
                     backgroundColor: neutral[200],
                     '.MuiTableCell-root': {
                         color: neutral[700],
+
+                        // boxShadow: `0px 2px 3px -1px rgba(0,0,0,0.36)`,
                     },
                 },
             },
         },
+
     },
 
     palette: {
         action: {
             active: neutral[500],
             focus: 'rgba(55, 65, 81, 0.12)',
-            hover: '#FF4DA3',
+            hover: '#ff903f',
             selected: 'rgba(55, 65, 81, 0.08)',
             disabledBackground: 'rgba(55, 65, 81, 0.12)',
             disabled: 'rgba(55, 65, 81, 0.26)',
@@ -299,6 +320,7 @@ export const lightThemeOptions = {
         whiteText,
         footerTopBgColor,
         nonVeg,
+        offerChip,
         sectionBg,
         cardBackground1,
         cardBackground2,

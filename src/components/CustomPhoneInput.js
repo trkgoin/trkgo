@@ -55,9 +55,8 @@ const useStyles = makeStyles((theme) => ({
             borderRight: 'none',
             padding:
                 languageDirection === 'rtl' ? '0 25px 0 11px' : ' 0 0px 0 11px',
-            borderRadius: `${borderradius ?? '3px'} 0px 0px ${
-                borderradius ?? '3px'
-            }`,
+            borderRadius: `${borderradius ?? '3px'} 0px 0px ${borderradius ?? '3px'
+                }`,
         },
         '&.react-tel-input .selected-flag .arrow': {
             left: languageDirection === 'rtl' ? '13px' : '29px',
@@ -92,10 +91,6 @@ const CustomPhoneInput = ({
     const theme = useTheme()
     const [languageDirection, setLanguageDirection] = useState('ltr')
     const [focus, setFocus] = useState(false)
-
-    // default country: IN (india) if kuch na mile
-    const defaultCountry = (initCountry || 'IN').toLowerCase()
-
     const classes = useStyles({
         theme,
         focus,
@@ -103,7 +98,7 @@ const CustomPhoneInput = ({
         rtlChange,
         borderradius,
     })
-
+    const defaultCountry = initCountry?.toLowerCase()
     const globalSettings = useSelector((state) => state.globalSettings.global)
 
     useEffect(() => {
@@ -113,13 +108,11 @@ const CustomPhoneInput = ({
     }, [])
 
     const changeHandler = (e) => {
+
         onHandleChange(e)
     }
-
     const handleBlur = () => {
-        if (value?.length < 10 && value?.length > 2) {
-            toast.error(t('Please enter a valid phone number'))
-        }
+        setFocus(false)
     }
 
     return (
@@ -153,9 +146,7 @@ const CustomPhoneInput = ({
                 }}
                 containerClass={classes.borderClass}
                 dropdownStyle={{ height: '197px', width: '267px' }}
-                // 👉 sirf India code allow
-                onlyCountries={[defaultCountry]} // yahan 'in' hi rahega
-                // Admin panel se agar country picker off ho to dropdown band ho jayega
+                onlyCountries={[]}
                 disableDropdown={globalSettings?.country_picker_status !== 1}
             />
             {touched && errors && (

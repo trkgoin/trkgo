@@ -3,7 +3,7 @@ import Typography from '@mui/material/Typography'
 
 import OutlinedInput from '@mui/material/OutlinedInput'
 import { useDispatch, useSelector } from 'react-redux'
-import { useQuery } from 'react-query'
+import { useQuery, useQueryClient } from 'react-query'
 import { useWishListGet } from '@/hooks/react-query/config/wish-list/useWishListGet'
 import 'react-phone-input-2/lib/material.css'
 import { useTranslation } from 'react-i18next'
@@ -28,7 +28,7 @@ import OtpForm from '../forgot-password/OtpForm'
 import { useVerifyPhone } from '@/hooks/react-query/otp/useVerifyPhone'
 import { setToken } from '@/redux/slices/userToken'
 import { getGuestId } from '../../checkout-page/functions/getGuestUserId'
-import { Stack, alpha, styled } from '@mui/material'
+import { Box, Stack, alpha, styled } from '@mui/material'
 import { CustomToaster } from '@/components/custom-toaster/CustomToaster'
 import OtpLogin from '@/components/auth/OtpLogin'
 import ManualLogin from '@/components/auth/ManualLogin'
@@ -104,6 +104,7 @@ const SignInPage = ({
     const dispatch = useDispatch()
     const { global } = useSelector((state) => state.globalSettings)
     const router = useRouter()
+    const queryClient = useQueryClient()
     const guestId = getGuestId()
     const [isRemember, setIsRemember] = useState(false)
     const [openOtpModal, setOpenOtpModal] = useState(false)
@@ -116,10 +117,26 @@ const SignInPage = ({
     if (typeof window !== 'undefined') {
         userDatafor = JSON.parse(localStorage.getItem('userDatafor'))
     }
+    const normalizedEmailOrPhone =
+        userDatafor?.email_or_phone === 'undefined' ||
+        userDatafor?.email_or_phone === 'null' ||
+        userDatafor?.email_or_phone == null
+            ? ''
+            : userDatafor?.email_or_phone
+    const normalizedPassword =
+        userDatafor?.password === 'undefined' ||
+        userDatafor?.password === 'null' ||
+        userDatafor?.password == null
+            ? ''
+            : userDatafor?.password
+    const rememberedPhone =
+        checkInput(normalizedEmailOrPhone) === 'phone'
+            ? normalizedEmailOrPhone
+            : ''
     const loginFormik = useFormik({
         initialValues: {
-            email_or_phone: userDatafor?.email_or_phone || '',
-            password: userDatafor ? userDatafor.password : '',
+            email_or_phone: normalizedEmailOrPhone,
+            password: normalizedPassword,
             tandc: false,
         },
         validationSchema: Yup.object({
@@ -158,12 +175,12 @@ const SignInPage = ({
                     localStorage.setItem('userDatafor', JSON.stringify(values))
                 }
                 formSubmitHandler({ ...values, login_type: 'manual' })
-            } catch (err) {}
+            } catch (err) { }
         },
     })
     const otpLoginFormik = useFormik({
         initialValues: {
-            phone: '',
+            phone: rememberedPhone,
         },
         validationSchema: Yup.object({
             phone: Yup.string()
@@ -172,8 +189,17 @@ const SignInPage = ({
         }),
         onSubmit: async (values, helpers) => {
             try {
+                if (isRemember) {
+                    localStorage.setItem(
+                        'userDatafor',
+                        JSON.stringify({
+                            email_or_phone: values.phone,
+                            password: '',
+                        })
+                    )
+                }
                 formSubmitHandler({ ...values, login_type: 'otp' })
-            } catch (err) {}
+            } catch (err) { }
         },
     })
     const otpHandleChange = (value) => {
@@ -212,6 +238,8 @@ const SignInPage = ({
             await cartListRefetch()
             CustomToaster('success', loginSuccessFull)
             dispatch(setToken(response.token))
+            queryClient.invalidateQueries('cart-item')
+            queryClient.invalidateQueries('cart-item-restaurant')
             if (
                 router.pathname === `/order-history/[id]` ||
                 router.pathname === '/forgot-password'
@@ -257,7 +285,7 @@ const SignInPage = ({
 
     const handleOnChange = (value) => {
         const isPlusCheck = formatPhoneNumber(value)
-        loginFormik.setFieldValue('email_or_phone', `${isPlusCheck}`)
+        loginFormik.setFieldValue('email_or_phone', isPlusCheck ?? '')
     }
 
     const gotoForgotPassword = () => {
@@ -273,7 +301,7 @@ const SignInPage = ({
         if (typeof window !== 'undefined') {
             userDatafor = JSON.parse(localStorage.getItem('userDatafor'))
         }
-        if(userDatafor){
+        if (userDatafor) {
             setIsRemember(true)
         }
     }, [])
@@ -354,7 +382,7 @@ const SignInPage = ({
         })
     }
 
-    const setInitialLoginType=() => {
+    const setInitialLoginType = () => {
         const { centralize_login } = global || {}
 
         if (centralize_login) {
@@ -446,7 +474,7 @@ const SignInPage = ({
                 direction="row"
                 spacing={1}
                 onClick={selectedOtp}
-                sx={{ marginY: '10px', cursor: 'pointer' }}
+                sx={{ marginBottom: '10px', marginTop: "4px", cursor: 'pointer' }}
             >
                 <CustomImageContainer
                     src={googleLatest.src}
@@ -456,7 +484,7 @@ const SignInPage = ({
                     objectFit="cover"
                     borderRadius="50%"
                 />
-                <Typography fontSize="14px" fontWeight="600">
+                <Typography className="custom-google-text" fontSize="14px">
                     {t('OTP Sign in')}
                 </Typography>
             </CustomGoogleButton>
@@ -481,7 +509,7 @@ const SignInPage = ({
                         <Stack sx={{ flexGrow: { md: 1 }, width: { xs: '100%', md: 0 } }}>
                             <ManualLogin {...sharedManualProps} />
                         </Stack>
-                        <Line languageDirection={languageDirection}  />
+                        <Line languageDirection={languageDirection} />
                         <Stack flexGrow={{ md: 1 }} width={{ xs: '100%', md: '0' }} gap="20px">
                             <SocialLogin {...sharedSocialProps} all={state.status === 'all'} />
                             {state.status === 'all' && OtpSignInButton}
@@ -507,15 +535,18 @@ const SignInPage = ({
             case 'otp_social':
                 return (
                     <>
-                        {OtpBlock}
-                        <Typography fontSize="14px">or login with</Typography>
+
                         <SocialLogin {...sharedSocialProps} />
+                        <Box sx={{ mt: 2, width: '100%' }}>
+                            {OtpSignInButton}
+                        </Box>
                     </>
                 );
             case 'manual':
                 return (
                     <Stack width="100%">
                         <ManualLogin {...sharedManualProps} />
+                         {SignupLink}
                     </Stack>
                 );
             default:
@@ -523,12 +554,12 @@ const SignInPage = ({
         }
     };
 
-// Where this is used:
-// {validStatuses.has(state.status) ? loginView() : <Skeleton height={300} />}  // Example of usage
+    // Where this is used:
+    // {validStatuses.has(state.status) ? loginView() : <Skeleton height={300} />}  // Example of usage
 
 
     return (
-        <Stack minHeight="450px">
+        <Stack >
             <RTL direction={languageDirection}>
                 <CustomStackFullWidth
                     alignItems="center"
@@ -544,24 +575,29 @@ const SignInPage = ({
                             />
                         </CustomStackFullWidth>
                         {state.activeLoginType?.social &&
-                        !state.activeLoginType?.manual &&
-                        !state.activeLoginType?.otp ? (
+                            !state.activeLoginType?.manual &&
+                            !state.activeLoginType?.otp ? (
                             <Typography textAlign="center">
                                 {t(`Welcome to ${global?.business_name}`)}
                             </Typography>
                         ) : (
-                            <Typography
-                                sx={{
-                                    fontWeight: 600,
-                                    fontSize: '18px',
-                                    paddingBottom: '5px',
-                                    color: (theme) =>
-                                        theme.palette.neutral[1000],
-                                }}
-                                textAlign="left"
-                            >
-                                {t('Login')}
-                            </Typography>
+                            <>
+                                {state.status === 'otp_social' ? null : (
+                                    <Typography
+                                        sx={{
+                                            fontWeight: 600,
+                                            fontSize: '18px',
+                                            paddingBottom: '5px',
+                                            color: (theme) =>
+                                                theme.palette.neutral[1000],
+                                        }}
+                                        textAlign="left"
+                                    >
+                                        {t('Login')}
+                                    </Typography>
+                                )}
+                            </>
+
                         )}
                     </CustomStackFullWidth>
                     <CustomStackFullWidth
@@ -570,7 +606,7 @@ const SignInPage = ({
                     >
                         {loginView()}
                     </CustomStackFullWidth>
-                    {state.status === 'manual' && (
+                    {state.status === 'manual' || state.status === 'otp_social' && (
                         <CustomStackFullWidth
                             alignItems="center"
                             spacing={0.5}

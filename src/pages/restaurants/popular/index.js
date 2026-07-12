@@ -1,6 +1,6 @@
 import React from 'react'
 import { NoSsr } from '@mui/material'
-import TypeWiseResturant from '../../../components/type-wise-resturant-page/TypeWiseResturant'
+import Restaurant from '../../../components/restaurant-page/Restaurant'
 import { landingPageApi } from '@/components/landingpage/Api'
 import Meta from '../../../components/Meta'
 import { useTranslation } from 'react-i18next'
@@ -15,15 +15,16 @@ const index = ({ configData, landingPageData, pathName }) => {
                 <Meta
                     title={`${t('Popular Restaurant')} ${t('on')} ${configData?.business_name
                         }`}
+                    description={`${t(
+                        'Explore the most-loved restaurants on'
+                    )} ${configData?.business_name} — ${t(
+                        'top-rated picks, trending menus, and crowd favorites near you.'
+                    )}`}
                     ogImage={`${configData?.base_urls?.react_landing_page_images}/${landingPageData?.banner_section_full?.banner_section_img_full}`}
                     pathName={pathName}
                 />
                 <NoSsr>
-                    <TypeWiseResturant
-                        restaurantType="popular"
-                        title="Popular Restaurant "
-                        description="Popular Restaurant Nearby"
-                    />
+                    <Restaurant />
                 </NoSsr>
             </div>
         </>

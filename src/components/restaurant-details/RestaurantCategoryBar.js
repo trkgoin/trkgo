@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
 import {
-    alpha,
     Grid,
     IconButton,
     Popover,
@@ -13,20 +12,20 @@ import { CategoryButton } from './restaurant-details.style'
 import { styled, useTheme } from '@mui/material/styles'
 import FilterButton from '../Button/FilterButton'
 import RestaurantFilterCard from '../home/restaurant/RestaurantFilterCard'
-import { filterData } from '../home/restaurant/FilterData'
 import { RTL } from '../RTL/RTL'
-import SearchIcon from '@mui/icons-material/Search'
-import { t } from 'i18next'
+import SearchBox from '../home/hero-section-with-search/SearchBox'
+import { useInView } from 'react-intersection-observer'
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import CustomSearch from '../custom-search/CustomSearch'
-import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos'
+import { t } from 'i18next'
 
 const CustomBox = styled(Box)(({ theme }) => ({
     width: '100%',
-    overflowX: 'none',
-    overflowY: 'auto',
+    overflow: 'auto',
     cursor: 'pointer',
     '&::-webkit-scrollbar': {
-        height: '2px',
+        height: '0px',
     },
     [theme.breakpoints.down('md')]: {
         '&::-webkit-scrollbar': {
@@ -46,11 +45,11 @@ const CustomBox = styled(Box)(({ theme }) => ({
         transition: 'opacity 0.2s',
     },
     '&::-webkit-scrollbar-thumb:hover': {
-        backgroundColor: theme.palette.neutral[400],
+        backgroundColor: theme.palette.neutral[100],
     },
     '&:hover': {
         '&::-webkit-scrollbar-thumb': {
-            opacity: 1,
+            opacity: 0,
         },
     },
 }))
@@ -60,20 +59,30 @@ const RestaurantCategoryBar = (props) => {
         data,
         selectedId,
         handleClick,
-        setFilterKey,
-        handleFilter,
         isSmall,
-        handleSearchResult,
         searchKey,
+        isHidden,
+        setRemoveStickyBanner,
+        removeStickyBanner,
+        highestPrice,
+        handlePrice,
+        handleChangeRatings,
+        handleReset,
+        handleFilterBy,
+        checkedFilterKey,
+        setCheckedFilterKey,
+        priceAndRating,
+        activeFilters,
+        handleSearchResult
     } = props
-    const [checkedFilterKey, setCheckedFilterKey] = useState(filterData)
-    const [searchBoxOpen, setSearchBoxOpen] = useState(false)
     const theme = useTheme()
 
     const [anchorEl, setAnchorEl] = useState(null)
     const open = Boolean(anchorEl)
     const refs = useRef([])
     const scrollerRef = useRef(null)
+    const [showLeftBtn, setShowLeftBtn] = useState(false)
+    const [showRightBtn, setShowRightBtn] = useState(false)
     const handleDropClick = (event) => {
         setAnchorEl(event.currentTarget)
     }
@@ -89,47 +98,60 @@ const RestaurantCategoryBar = (props) => {
             const offset =
                 buttonLeft -
                 scrollerLeft +
-                (selectedButton.offsetWidth - scrollerRef.current.offsetWidth) /
-                2
-            scrollerRef.current.scrollLeft = offset
+                scrollerRef.current.scrollLeft
+            scrollerRef.current.scrollTo({
+                left: Math.max(0, offset),
+                behavior: 'smooth',
+            })
         }
     }, [selectedId])
 
-    const handleFilterData = (event, id) => {
-        const activeFilters = checkedFilterKey.filter(
-            (filter) => filter.isActive === true
-        )
+    const updateScrollButtonVisibility = () => {
+        const scroller = scrollerRef.current
+        if (!scroller) return
 
-        const filteredData = {
-            veg:
-                activeFilters.find((filter) => filter.value === 'veg') !==
-                undefined,
-            nonVeg:
-                activeFilters.find((filter) => filter.value === 'nonVeg') !==
-                undefined,
-            currentlyAvailable:
-                activeFilters.find(
-                    (filter) => filter.value === 'currentlyAvailable'
-                ) !== undefined,
-            discount:
-                activeFilters.find((filter) => filter.value === 'discount') !==
-                undefined,
-        }
-        setFilterKey(filteredData)
-        handleFilter()
+        const { scrollLeft, scrollWidth, clientWidth } = scroller
+        const maxScrollLeft = scrollWidth - clientWidth
+
+        setShowLeftBtn(scrollLeft > 0)
+        // Only show right button when content overflows and we are not at the end
+        setShowRightBtn(maxScrollLeft > 2 && scrollLeft < maxScrollLeft - 2)
     }
 
     useEffect(() => {
-        handleFilterData()
-    }, [checkedFilterKey])
+        updateScrollButtonVisibility()
+
+        const currentScroller = scrollerRef.current
+        if (currentScroller) {
+            currentScroller.addEventListener(
+                'scroll',
+                updateScrollButtonVisibility
+            )
+            window.addEventListener('resize', updateScrollButtonVisibility)
+        }
+
+        return () => {
+            if (currentScroller) {
+                currentScroller.removeEventListener(
+                    'scroll',
+                    updateScrollButtonVisibility
+                )
+                window.removeEventListener('resize', updateScrollButtonVisibility)
+            }
+        }
+    }, [])
+
+    // Recalculate when categories change (e.g., after API load)
+    useEffect(() => {
+        const raf = requestAnimationFrame(updateScrollButtonVisibility)
+        return () => cancelAnimationFrame(raf)
+    }, [data])
+
     let languageDirection = undefined
     if (typeof window !== 'undefined') {
         languageDirection = localStorage.getItem('direction')
     }
 
-    const handleSearchBox = () => {
-        setSearchBoxOpen(!searchBoxOpen)
-    }
     const isActiveCategoryBar = (item, index) => {
         if (selectedId !== null) {
             if (selectedId === item?.id) {
@@ -143,47 +165,97 @@ const RestaurantCategoryBar = (props) => {
             }
         }
     }
-    const handleReset = () => {
-        const data = checkedFilterKey?.map((item) => ({
-            ...item,
-            isActive: false,
-        }))
-        setCheckedFilterKey(data)
-    }
+    const { ref, inView } = useInView({
+        rootMargin: '-130px 0px 0px 0px',
+    })
+
+    // Detect when the sticky bar reaches its mobile stick-top (190px) so we
+    // can break it out of the parent Container only while it's stuck.
+    const { ref: stickySentinelRef, inView: stickySentinelInView } = useInView({
+        rootMargin: '-190px 0px 0px 0px',
+    })
+    const isMobileStuck = isSmall && !stickySentinelInView
+
+    useEffect(() => {
+        // Skip the sticky-banner-removal dance on mobile — the banner is no longer
+        // fixed there, so this state isn't read by TopBanner on small viewports.
+        if (isSmall) return
+        if (inView) {
+            setRemoveStickyBanner(false)
+        } else {
+            setRemoveStickyBanner(true)
+        }
+    }, [inView, isSmall])
+
+
     return (
         <RTL direction={languageDirection}>
+            <Box ref={stickySentinelRef} sx={{ height: '1px', marginBottom: '-1px' }} />
             <Grid
                 container
+                spacing={{ xs: 0, sm: 1 }}
+                rowSpacing={{ xs: 0.5, sm: 0 }}
+                ref={ref}
                 sx={{
                     position: 'sticky',
-                    top: { xs: "173px", md: "160px" }, // Dynamic height based on TopBanner
-                    background: (theme) => theme.palette.neutral[1800],
-                    padding: {
-                        xs: '5px 5px 7px 10px',
-                        sm: '4px 5px 0px 0px',
-                        md: '4px 5px 0px 0px',
+                    top: {
+                        xs: 'calc(var(--restaurant-fixed-top-bottom, 190px) + (-12px))',
+                        sm: '140px',
+                        md: isHidden ? '162px' : '203px',
                     },
-                    zIndex: 998, // Lower z-index than TopBanner
-                    boxShadow: `0px 4px 15px 0px ${alpha(
-                        theme.palette.primary.main,
-                        0.1
-                    )}`,
+                    background: (theme) => theme.palette.neutral[1800],
+                    padding: { xs: '8px 8px', md: '10px 0px 5px' },
+                    ...(isMobileStuck && {
+                        marginLeft: '-16px',
+                        marginRight: '-16px',
+                        width: 'calc(100% + 32px)',
+                        maxWidth: 'none',
+                    }),
+                    zIndex: 100,
+                    transition: 'top 0.25s ease, box-shadow 0.25s ease',
                 }}
                 alignItems="center"
             >
-                <Grid item xs={8} sm={10} md={10} sx={{ position: 'relative' }}>
-                    {isSmall && searchBoxOpen ? (
-                        <Stack sx={{ animation: 'fadeInRight 1s  1' }}>
-                            <CustomSearch
-                                borderRadius="5px"
-                                handleSearchResult={handleSearchResult}
-                                label={t('Search foods')}
-                                searchFrom="restaurantDetails"
-                                selectedValue={searchKey}
-                            />
-                        </Stack>
-                    ) : (
-                        <CustomBox ref={scrollerRef}>
+                <Grid
+                    item
+                    xs={12}
+                    sm={9}
+                    md={7}
+                    order={{ xs: 1, sm: 1 }}
+                    sx={{ position: 'relative' }}
+                >
+                    <CustomBox ref={scrollerRef}>
+                            {showLeftBtn && (
+                                <IconButton
+                                    sx={{
+                                        width: '32px',
+                                        height: '32px',
+                                        borderRadius: '50%',
+                                        backgroundColor:
+                                            theme.palette.neutral[100],
+                                        boxShadow: `0px 5px 10px rgba(0, 0, 0, 0.1)`,
+                                        position: 'absolute',
+                                        top: 'calc(50% + 2.5px)',
+                                        transform: 'translateY(-50%)',
+                                        left: '0px',
+                                        zIndex: 9999,
+                                        '&:hover': {
+                                            backgroundColor:
+                                                theme.palette.neutral[100],
+                                        },
+                                    }}
+                                    onClick={() => {
+                                        if (scrollerRef.current) {
+                                            scrollerRef.current.scrollBy({
+                                                left: -200,
+                                                behavior: 'smooth',
+                                            })
+                                        }
+                                    }}
+                                >
+                                    <ChevronLeftIcon fontSize="small" />
+                                </IconButton>
+                            )}
                             <CustomStackFullWidth direction="row">
                                 {data?.map((item, index) => {
                                     return (
@@ -203,7 +275,7 @@ const RestaurantCategoryBar = (props) => {
                                         >
                                             <Typography
                                                 fontSize={{
-                                                    xs: '12px',
+                                                    xs: '13px',
                                                     sm: '14px',
                                                     md: '14px',
                                                 }}
@@ -222,72 +294,73 @@ const RestaurantCategoryBar = (props) => {
                                     )
                                 })}
                             </CustomStackFullWidth>
-                        </CustomBox>
-                    )}
+                            {showRightBtn && (
+                                <IconButton
+                                    sx={{
+                                        width: '32px',
+                                        height: '32px',
+                                        borderRadius: '50%',
+                                        backgroundColor:
+                                            theme.palette.neutral[100],
+                                        boxShadow: `0px 5px 10px rgba(0, 0, 0, 0.1)`,
+                                        position: 'absolute',
+                                        top: 'calc(50% + 2.5px)',
+                                        transform: 'translateY(-50%)',
+                                        left: 'auto',
+                                        right: 0,
+                                        zIndex: 999,
+                                        '&:hover': {
+                                            backgroundColor:
+                                                theme.palette.neutral[100],
+                                        },
+                                    }}
+                                    onClick={() => {
+                                        if (scrollerRef.current) {
+                                            scrollerRef.current.scrollBy({
+                                                left: 200,
+                                                behavior: 'smooth',
+                                            })
+                                        }
+                                    }}
+                                >
+                                    <ChevronRightIcon fontSize="small" />
+                                </IconButton>
+                            )}
+                    </CustomBox>
                 </Grid>
 
                 <Grid
                     item
-                    xs={4}
-                    sm={2}
-                    md={2}
+                    xs={12}
+                    sm={3}
+                    md={5}
+                    order={{ xs: 2, sm: 2 }}
                     align={languageDirection === 'rtl' ? 'left' : 'right'}
                     marginBottom={{ xs: '0px', md: '8px' }}
                 >
                     <Stack
                         direction="row"
-                        spacing={0.5}
-                        justifyContent={
-                            searchBoxOpen
-                                ? 'flex-end'
-                                : isSmall
-                                    ? 'space-between'
-                                    : 'flex-end'
-                        }
+                        width="100%"
+                        spacing={1}
                         alignItems="center"
-                        paddingLeft="15px"
+                        sx={{ marginInlineStart: 'auto' }}
                     >
-                        <Stack
-                            direction="row"
-                            spacing={1}
-                            justifySelf="flex-end"
-                        >
-                            {isSmall && (
-                                <IconButton
-                                    onClick={handleSearchBox}
-                                    sx={{
-                                        background: (theme) =>
-                                            alpha(
-                                                theme.palette.primary.main,
-                                                0.3
-                                            ),
-                                        borderRadius: '3px',
-                                        padding: '6px',
-                                        fontSize: '1.4rem',
-                                    }}
-                                >
-                                    {!searchBoxOpen ? (
-                                        <SearchIcon
-                                            fontSize="1.3rem"
-                                            sx={{
-                                                color: (theme) =>
-                                                    theme.palette.primary.main,
-                                            }}
-                                        />
-                                    ) : (
-                                        <ArrowForwardIosIcon
-                                            fontSize="14px"
-                                            sx={{
-                                                color: (theme) =>
-                                                    theme.palette.primary.main,
-                                            }}
-                                        />
-                                    )}
-                                </IconButton>
-                            )}
+                     <CustomSearch
+                                    //key={reRenderSearch}
+                                    handleSearchResult={handleSearchResult}
+                                    label={t('Search foods')}
+                                    //isLoading={isLoadingSearchFood}
+                                    searchFrom="restaurantDetails"
+                                    selectedValue={searchKey}
+                                    backgroundColor={theme.palette.neutral[200]}
+                                    borderRadius="10px"
+                                />
 
-                            <FilterButton handleClick={handleDropClick} />
-                        </Stack>
+                        <FilterButton
+                            handleClick={handleDropClick}
+                            height="32px"
+                            activeFilters={activeFilters}
+                        />
                     </Stack>
                 </Grid>
             </Grid>
@@ -305,14 +378,19 @@ const RestaurantCategoryBar = (props) => {
                 }}
             >
                 <RestaurantFilterCard
-                    homeRestaurant="true"
+                    rowWise
+                    foodOrRestaurant="products"
                     checkboxData={checkedFilterKey}
                     handleDropClose={handleDropClose}
                     anchorEl={anchorEl}
-                    handleFilterData={handleFilterData}
                     setCheckedFilterKey={setCheckedFilterKey}
-                    setFilterKey={setFilterKey}
+                    handleChangeRatings={handleChangeRatings}
+                    priceAndRating={priceAndRating}
                     handleReset={handleReset}
+                    highestPrice={highestPrice}
+                    handlePrice={handlePrice}
+                    handleFilterBy={handleFilterBy}
+                    only_food={true}
                 />
             </Popover>
         </RTL>

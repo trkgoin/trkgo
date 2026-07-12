@@ -16,27 +16,30 @@ const RestaurantRightDetails = ({ details, data, scrollPosition, threshold }) =>
     const theme = useTheme()
     const isSmall = useMediaQuery(theme.breakpoints.down('sm'))
 
+    const imageHeight = isSmall ? 150 : scrollPosition <= threshold ? 250 : 180
+
     return (
         <NoSsr>
             <CustomStackFullWidth
                 sx={{
                     position: !isSmall && 'relative',
                     background: (theme) => theme.palette.neutral[100],
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    height: imageHeight,
+                    overflow: 'hidden',
                 }}
             >
-                {/*<CustomImageContainer*/}
-                {/*    src={details.cover_photo_full_url}*/}
-                {/*    height={scrollPosition === 0 ? '250px' : '180px'}*/}
-                {/*    smHeight="120px"*/}
-                {/*    width="100%"*/}
-                {/*    objectFit="cover !important"*/}
-                {/*/>*/}
+
                 <CustomImage
                     src={details?.cover_photo_full_url}
-                    height={scrollPosition <= threshold ? 250 : 180}
-                    smHeight="120px"
+                    height={imageHeight}
                     width={700}
-                    objectFit="cover !important"
+                    objectFit="cover"
+                    errorWidth={80}
+                    errorHeight={80}
+                    alt="Restaurant Cover Photo"
+                    style={{ width: details?.cover_photo_full_url ? '100%' : undefined }}
                 />
 
                 {data?.data.length > 0 && (

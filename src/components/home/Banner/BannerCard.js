@@ -8,6 +8,10 @@ import CustomNextImage from '@/components/CustomNextImage'
 const BannerCard = ({ banner, handleBannerClick, onlyShimmer }) => {
     const bannerImage = banner?.image_full_url
     const isSmall = window.innerWidth < 600
+    const bannerAspectRatio =
+        banner?.width && banner?.height
+            ? `${banner.width} / ${banner.height}`
+            : null
     return (
         <>
             {onlyShimmer ? (
@@ -16,7 +20,14 @@ const BannerCard = ({ banner, handleBannerClick, onlyShimmer }) => {
                         width="100%"
                         height="auto"
                         variant="rounded"
-                        sx={{ aspectRatio: '2 / 1.06' }}
+                        sx={{
+                            borderRadius: '16px',
+                            aspectRatio:
+                                bannerAspectRatio ?? {
+                                    xs: '2 / 0.77',
+                                    md: '2 / 1',
+                                },
+                        }}
                     />
                 </CustomStackFullWidth>
             ) : (
@@ -26,21 +37,34 @@ const BannerCard = ({ banner, handleBannerClick, onlyShimmer }) => {
                         cursor: 'pointer',
                         overflow: 'hidden',
                         transition: 'transform 0.3s ease',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        aspectRatio:
+                            bannerAspectRatio ?? {
+                                xs: '2 / 0.77',
+                                md: '2 / 1',
+                            },
+                        // boxShadow: '0px 10px 30px rgba(0, 0, 0, 0)',
                         '&:hover': {
-                            transform: 'scale(1.03)', // slight zoom/lift
+                            transform: 'scale(1.02)',
+                            // boxShadow: '0px 10px 30px rgba(0, 0, 0, 0.16)',
                         },
                     }}
                     onClick={() => handleBannerClick(banner)}
                 >
                     <CustomNextImage
                         src={bannerImage}
-                        width={370}
+                        width={500}
                         height={isSmall ? 142 : 185}
+                        errorWidth={80}
+                        errorHeight={80}
                         alt="banner"
                         priority
                         borderRadius="16px"
-                        objectFit="contain"
+                        objectFit="cover"
                         style={{
+                            width: '100%',
+                            height: '100%',
                             transition: 'transform 0.4s ease',
                         }}
                     />

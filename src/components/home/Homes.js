@@ -1,3 +1,4 @@
+import MainApi from '@/api/MainApi'
 import { BannerApi } from '@/hooks/react-query/config/bannerApi'
 import { CampaignApi } from '@/hooks/react-query/config/campaignApi'
 import {
@@ -47,7 +48,9 @@ import CustomContainer from '../container'
 import CustomModal from '../custom-modal/CustomModal'
 import ProductSearchPage from '../products-page/ProductSearchPage'
 import Banner from './Banner'
-import DifferentFoodCompontent from './DefferntFoodCompontent'
+import TrendingFoodTabs from './trending-food-tabs/TrendingFoodTabs'
+import TrendingBites from './trending-bites/TrendingBites'
+import LastOrderSection from './last-order/LastOrderSection'
 import NewRestaurant from './NewRestaurant'
 import PromotionalBanner from './PromotionalBanner'
 import Restaurant from './Restaurant'
@@ -64,8 +67,16 @@ import NearByRestaurant from '@/components/home/visit-again/NearByRestaurant'
 import CloseIcon from '@mui/icons-material/Close'
 import CustomImageContainer from '@/components/CustomImageContainer'
 import { setGlobalSettings } from '@/redux/slices/global'
+import AppDownloadBanner from '@/components/home/AppDownloadBanner'
+import FindNearbyReferStrip from '@/components/home/find-nearby-refer/FindNearbyReferStrip'
+import HomeSidebar from '@/components/home/home-sidebar/HomeSidebar'
+import SubscribeServices from '@/components/home/subscribe-services/SubscribeServices'
+import useHideOnScroll from '@/hooks/custom-hooks/useHideOnScroll'
+import CustomPageTitleSubtitle from '@/components/CustomPageTitleSubtitle'
 
-const Homes = ({ configData }) => {
+const SECTION_GAP = { xs: 3, md: 4 }
+
+const Homes = ({ configData, landingPageData: landingPageDataProp }) => {
     const theme = useTheme()
     const dispatch = useDispatch()
     const { global } = useSelector((state) => state.globalSettings)
@@ -75,6 +86,24 @@ const Homes = ({ configData }) => {
     const [openDineInRes, setOpenDineInRes] = useState(false)
     const isXSmall = useMediaQuery(theme.breakpoints.down('sm'))
     const [openDrawer, setOpenDrawer] = useState(false)
+    const isNavHidden = useHideOnScroll({ threshold: 50 })
+
+    const { data: landingPageApiData } = useQuery(
+        ['landing-page-data'],
+        () => MainApi.get('/api/v1/react-landing-page').then((res) => res.data),
+        { staleTime: 1000 * 60 * 10 }
+    )
+    const landingPageData = landingPageApiData || landingPageDataProp
+
+    const playStoreLink =
+        landingPageData?.download_app_section
+            ?.react_download_apps_play_store_link ||
+        'https://play.google.com/store/apps'
+    const appStoreLink =
+        landingPageData?.download_app_section?.react_download_apps_link ||
+        'https://apps.apple.com'
+    const downloadAppData =
+        landingPageData?.download_app_section || landingPageData
 
     useEffect(() => {
         if (!global) {
@@ -85,6 +114,9 @@ const Homes = ({ configData }) => {
     const drawerBleeding = 0
     const { searchTagData, cuisineData } = useSelector(
         (state) => state.searchTags
+    )
+    const activeFilters = searchTagData?.filter(
+        (item) => item.isActive === true
     )
     const router = useRouter()
     const { query, page, restaurantType, tags } = router.query
@@ -97,6 +129,10 @@ const Homes = ({ configData }) => {
     } = useSelector((state) => state.storedData)
 
     const { welcomeModal, isNeedLoad } = useSelector((state) => state.utilsData)
+    const { token } = useSelector((state) => state.userToken)
+    const restaurantIsSticky = useSelector(
+        (state) => state.scrollPosition.restaurantIsSticky
+    )
     const onSuccessHandler = (response) => {
         setFetcheedData(response)
         dispatch(setWishList(fetchedData))
@@ -245,33 +281,64 @@ const Homes = ({ configData }) => {
     const toggleDrawer = () => () => {
         setOpenDrawer(!openDrawer)
     }
+    console.log('bbbb', query, page, restaurantType, tags)
+
+    console.log({ configData })
 
     return (
         <PushNotificationLayout>
+            <Box
+                sx={{
+                    marginTop: { xs: '60px', md: '112px' },
+                    position: 'sticky',
+                    top: {
+                        xs: '53px',
+                        md: isNavHidden ? '58px' : '99px',
+                    },
+                    transition:
+                        'top 0.25s ease, transform 0.25s ease, opacity 0.2s ease',
+                    zIndex: 99,
+                    backgroundColor: (theme) =>
+                        theme.palette.background.default,
+                    transform: restaurantIsSticky
+                        ? 'translateY(-100%)'
+                        : 'translateY(0)',
+                    opacity: restaurantIsSticky ? 0 : 1,
+                    pointerEvents: restaurantIsSticky ? 'none' : 'auto',
+                }}
+            >
+                <SearchFilterTag
+                    sort_by={sort_by}
+                    setSort_by={setSort_by}
+                    tags={tags}
+                    query={query}
+                    page={page}
+                    restaurantType={restaurantType}
+                />
+            </Box>
             <CustomContainer>
                 <CustomStackFullWidth
                     sx={{
-                        marginTop: { xs: '60px', md: '135px' },
-                        marginBottom: '16px',
+                        mt: SECTION_GAP,
                         direction: 'row',
+                        display: restaurantType === 'dine-in' ? 'flex' : 'none',
                     }}
                 >
-                    <Stack
-                        direction="row"
-                        width="100%"
-                        justifyContent="space-between"
-                    >
-                        <Typography
-                            fontSize={{ xs: '16px', md: '20px' }}
-                            fontWeight={{
-                                xs: '500',
-                                md: '700',
-                            }}
-                            color={theme.palette.neutral[1000]}
-                            component="h1"
-                        >
-                            {t('Find Best Restaurants and Foods')}
-                        </Typography>
+                    <Stack direction="row" width="100%">
+                        <Stack spacing={0.5}>
+                            <Typography
+                                fontSize={{ xs: '18px', md: '22px' }}
+                                fontWeight={{
+                                    xs: '700',
+                                    md: '800',
+                                }}
+                                sx={{ letterSpacing: '-0.02em' }}
+                                color={theme.palette.neutral[1000]}
+                                component="h1"
+                            >
+                                {t('Find Best Restaurants and Foods')}
+                            </Typography>
+                        </Stack>
 
                         <>
                             {restaurantType === 'dine-in' && (
@@ -323,60 +390,113 @@ const Homes = ({ configData }) => {
                     </Stack>
                 </CustomStackFullWidth>
             </CustomContainer>
-            <SearchFilterTag
-                sort_by={sort_by}
-                setSort_by={setSort_by}
-                tags={tags}
-                query={query}
-                page={page}
-                restaurantType={restaurantType}
-            />
-            {query || page || restaurantType || tags ? (
+            {query || activeFilters?.length > 0 ? (
                 <CustomContainer>
-                    <ProductSearchPage
-                        tags={tags}
-                        configData={configData}
-                        query={query}
-                        page={page}
-                        restaurantType={restaurantType}
-                    />
+                    <Box
+                        sx={{
+                            display: { xs: 'block', md: 'grid' },
+                            gridTemplateColumns: { md: '260px 1fr' },
+                            columnGap: { md: '28px' },
+                        }}
+                    >
+                        <Box
+                            sx={{
+                                display: { xs: 'none', md: 'block' },
+                                position: 'relative',
+                            }}
+                        >
+                            <HomeSidebar />
+                        </Box>
+                        <Box
+                            sx={{
+                                minWidth: 0,
+                                marginTop: { xs: '1.5rem', md: '1.5rem' },
+                            }}
+                        >
+                            <CustomPageTitleSubtitle
+                                title={
+                                    query
+                                        ? `${t(
+                                              'Search results for'
+                                          )} "${query}"`
+                                        : restaurantType === 'dine-in'
+                                        ? t('Dine-in Restaurants')
+                                        : tags
+                                        ? t('Filtered Results')
+                                        : t('Search Results')
+                                }
+                                subtitle={t(
+                                    'Foods and restaurants matching your selection — refine the filters to narrow down further.'
+                                )}
+                            />
+                            <ProductSearchPage
+                                tags={tags}
+                                configData={configData}
+                                query={query}
+                                page={page}
+                                restaurantType={restaurantType}
+                            />
+                        </Box>
+                    </Box>
                 </CustomContainer>
             ) : (
-                <>
-                    <CustomContainer>
-                        <Banner isFetched={isFetched} data={data} />
-                    </CustomContainer>
-                    <Box>
-                        <FeatureCatagories height="70px" />
-                        <CustomContainer>
-                            <VisitAgain />
-                            <AddsSection
-                                data={addStores}
-                                isLoading={addIsLoading}
-                            />
-                            {configData?.data?.dine_in_order_option === 1 ? (
-                                <DineIn />
-                            ) : null}
-                        </CustomContainer>
-                    </Box>
-                    <CustomContainer>
-                        <DifferentFoodCompontent
-                            campaignIsloading={campaignIsloading}
-                            isLoading={isLoading}
-                            isLoadingNearByPopularRestaurantData={
-                                isLoadingNearByPopularRestaurantData
-                            }
-                        />
-                        <NewRestaurant />
-                        {configData && <Cuisines />}
-
-                        {configData?.banner_data?.promotional_banner_image && (
-                            <PromotionalBanner global={configData} />
-                        )}
-
-                        <Restaurant />
-                    </CustomContainer>
-                </>
+                <CustomContainer>
+                    <Stack sx={{ gap: SECTION_GAP }}>
+                        <Box
+                            sx={{
+                                display: { xs: 'block', md: 'grid' },
+                                gridTemplateColumns: { md: '260px 1fr' },
+                                columnGap: { md: '28px' },
+                            }}
+                        >
+                            <Box
+                                sx={{
+                                    display: { xs: 'none', md: 'block' },
+                                    position: 'relative',
+                                }}
+                            >
+                                <HomeSidebar />
+                            </Box>
+                            <Stack sx={{ minWidth: 0, gap: SECTION_GAP }}>
+                                <Banner isFetched={isFetched} data={data} />
+                                <FeatureCatagories height="70px" />
+                                <FindNearbyReferStrip />
+                                <VisitAgain />
+                                <AddsSection
+                                    data={addStores}
+                                    isLoading={addIsLoading}
+                                />
+                                <AppDownloadBanner
+                                    downloadAppData={downloadAppData}
+                                    playStoreLink={playStoreLink}
+                                    appStoreLink={appStoreLink}
+                                />
+                                {configData?.data?.dine_in_order_option ===
+                                1 ? (
+                                    <DineIn />
+                                ) : null}
+                                {configData?.repeat_order_option && token ? (
+                                    <LastOrderSection />
+                                ) : null}
+                                <TrendingFoodTabs
+                                    campaignIsLoading={campaignIsloading}
+                                    popularIsLoading={
+                                        isLoadingNearByPopularRestaurantData
+                                    }
+                                    bestReviewedIsLoading={isLoading}
+                                />
+                                <TrendingBites />
+                                <NewRestaurant />
+                                {configData && <Cuisines />}
+                                {configData?.banner_data
+                                    ?.promotional_banner_image && (
+                                    <PromotionalBanner global={configData} />
+                                )}
+                                <Restaurant />
+                            </Stack>
+                        </Box>
+                    </Stack>
+                </CustomContainer>
             )}
 
             <CustomModal
@@ -420,10 +540,10 @@ const Homes = ({ configData }) => {
                         >
                             {userData?.is_valid_for_discount
                                 ? t(
-                                    `Get ready for a special welcome gift, enjoy a special discount on your first order within `
-                                ) +
-                                userData?.validity +
-                                '.'
+                                      `Get ready for a special welcome gift, enjoy a special discount on your first order within `
+                                  ) +
+                                  userData?.validity +
+                                  '.'
                                 : ''}
                             {'  '}
                             {t(

@@ -13,8 +13,8 @@ const neutral = {
     1000: '#FFFFFF',
     1200: '#e1e6e6',
     1400: 'rgba(56, 52, 52, 0.8)',
-    1500: 'rgba(226, 0, 116, 0.6)',
-    1600: '#E200744D',
+    1500: 'rgba(239, 120, 34, 0.6)',
+    1600: '#EF78224D',
     1700: '#192238',
     1800: '#1C1919',
 }
@@ -32,15 +32,20 @@ const background = {
 }
 const footerCenterBg = '#2f3645'
 const footerAppBg = '#414141'
-const footerTopBg = 'rgba(226, 0, 116, 0.05)'
+const footerTopBg = 'rgba(255, 235, 221, 0.05)'
 const footerMiddleBg = '#343c4d'
 const divider = '#2D3748'
 const newsletterBG = '#2287FD'
 const nonVeg = '#EE7878'
+const offerChip = {
+    bg: 'rgba(236, 72, 153, 0.15)',
+    text: '#F472B6',
+    icon: '#F472B6',
+}
 const sectionBg = '#F5F6F80D'
 const cardBackground1 = '#1C1919'
 const cardBackground2 = 'rgba(255, 255, 255, 0.05)'
-const searchBoxBg = '#E20074'
+const searchBoxBg = '#6B503C'
 const borderBottomBg = 'rgba(255, 255, 255, 0.2)'
 const navbarBg = '#292525'
 const skeletonColor =
@@ -49,20 +54,20 @@ const skeletonColorAfter =
     'linear-gradient(78.58deg, #F5F6F8 3.23%, #FDFDFD 53.13%, #F6F7F8 100%)'
 
 const primary = {
-    main: '#E20074',
-    light: '#FF4DA3',
-    dark: '#9B004D',
+    main: '#FF7918',
+    light: '#ff6700',
+    dark: '#a3460a',
     contrastText: neutral[900],
-    midPrimary: '#2E0019',
+    midPrimary: '#031C3A',
     overLay: '#000000',
 }
 const paperBoxShadow = '#000000'
 
 const secondary = {
-    main: '#B3005A',
-    light: '#FF4DA3',
-    dark: '#7A003E',
-    semiLight: '#FFF0F7',
+    main: '#934916',
+    light: '#db5c00',
+    dark: '#a2684c',
+    semiLight: '#FFFAF6',
     contrastText: neutral[900],
 }
 
@@ -115,9 +120,9 @@ const pending = {
 }
 const whiteContainer = {
     main: '#F9FAFC',
-    light: '#E20074',
-    dark: '#B3005A',
-    contrastText: '#E20074',
+    light: '#EF7822',
+    dark: '#ff903f',
+    contrastText: '#EF7822',
 }
 const customColor = {
     one: '#FF5E00',
@@ -279,6 +284,7 @@ export const darkThemeOptions = {
         whiteText,
         footerTopBgColor,
         nonVeg,
+        offerChip,
         sectionBg,
         cardBackground1,
         cardBackground2,

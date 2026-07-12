@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { NoSsr } from '@mui/material'
+import { Box, NoSsr } from '@mui/material'
 import Meta from '../../../components/Meta.js'
 import CategoryDetailsPage from '../../../components/category/CategoryDetailsPage'
 import { useRouter } from 'next/router'
@@ -12,11 +12,16 @@ import CustomContainer from '../../../components/container'
 import HomeGuard from "../../../components/home-guard/HomeGuard"
 import { getCommonServerSideProps } from '@/helpers/serverSidePropsHelper'
 import { processMetadata } from '@/utils/fetchPageMetadata'
+import { useSelector } from 'react-redux'
+import HomeSidebar from '@/components/home/home-sidebar/HomeSidebar'
+import CustomPageTitleSubtitle from '@/components/CustomPageTitleSubtitle'
+import { useTranslation } from 'react-i18next'
 
 const index = ({ metaData, pathName, configData, landingPageData }) => {
+    const { t } = useTranslation()
     const [type, setType] = useState('all')
     const [offset, setOffset] = useState(1)
-    const [page_limit, setPageLimit] = useState(10)
+    const [page_limit, setPageLimit] = useState(36)
     const [filterByData, setFilterByData] = useState({})
     const [priceAndRating, setPriceAndRating] = useState({
         price: [],
@@ -26,23 +31,52 @@ const index = ({ metaData, pathName, configData, landingPageData }) => {
     const router = useRouter()
     const { id, name } = router.query
     const [category_id, setCategoryId] = useState(id)
-    const { isLoading, data, isError, error, refetch } = useQuery(
+    const { foodOrRestaurant } = useSelector((state) => state.searchFilterStore)
+    const { isLoading: isProductsLoading, data } = useQuery(
         [`category-details`, category_id, offset, page_limit, type, filterByData, priceAndRating],
-        () => CategoryApi.categoriesDetails(category_id, type, offset, page_limit, filterByData, priceAndRating)
+        () =>
+            CategoryApi.categoriesDetails(
+                category_id,
+                type,
+                offset,
+                page_limit,
+                filterByData,
+                priceAndRating,
+                name
+            ),
+        {
+            enabled: Boolean(category_id) && foodOrRestaurant === 'products',
+        }
     )
-    const { data: resData } = useQuery(
+    const { isLoading: isRestaurantsLoading, data: resData } = useQuery(
         [`category-detailsRes`, category_id, offset, page_limit, type, filterByData, priceAndRating],
         () =>
             CategoryApi.categoriesDetailsForRes(
                 category_id,
                 type,
                 offset,
-                page_limit, filterByData, priceAndRating
-            )
+                page_limit,
+                filterByData,
+                priceAndRating,
+                name
+            ),
+        {
+            enabled: Boolean(category_id) && foodOrRestaurant === 'restaurants',
+        }
     )
+    const isLoading =
+        foodOrRestaurant === 'products'
+            ? isProductsLoading
+            : isRestaurantsLoading
+
     useEffect(() => {
         type && setOffset(1)
     }, [type])
+
+    useEffect(() => {
+        setPageLimit(foodOrRestaurant === 'products' ? 36 : 20)
+        setOffset(1)
+    }, [foodOrRestaurant])
 
     useEffect(() => {
         setPriceAndRating({ ...priceAndRating, rating: 0 })
@@ -53,11 +87,6 @@ const index = ({ metaData, pathName, configData, landingPageData }) => {
         description: '',
         image: `${landingPageData?.banner_section_full?.banner_section_img_full}`
     })
-
-
-    console.log({ metaData });
-
-
     return (
         <>
             <Meta
@@ -70,29 +99,51 @@ const index = ({ metaData, pathName, configData, landingPageData }) => {
             <NoSsr>
                 <HomeGuard>
                     <CustomContainer>
-                        <CustomStackFullWidth
-                            sx={{ paddingBottom: '1rem', paddingTop: { xs: "2rem", md: "4.5rem" } }}
+                        <Box
+                            sx={{
+                                marginTop: { xs: '5rem', md: '7rem' },
+                                paddingBottom: '1rem',
+                                //paddingTop: { xs: '0rem', md: '5.5rem' },
+                                display: { xs: 'block', md: 'grid' },
+                                gridTemplateColumns: { md: '260px 1fr' },
+                                columnGap: { md: '28px' },
+                            }}
                         >
-                            <CategoryDetailsPage
-                                id={id}
-                                data={data}
-                                category_id={category_id}
-                                setCategoryId={setCategoryId}
-                                resData={resData}
-                                offset={offset}
-                                type={type}
-                                setType={setType}
-                                page_limit={page_limit}
-                                setOffset={setOffset}
-                                name={name}
-                                filterByData={filterByData}
-                                setFilterByData={setFilterByData}
-                                priceAndRating={priceAndRating}
-                                setPriceAndRating={setPriceAndRating}
-                                isLoading={isLoading}
-
-                            />
-                        </CustomStackFullWidth>
+                            <Box
+                                sx={{
+                                    display: { xs: 'none', md: 'block' },
+                                    position: 'relative',
+                                }}
+                            >
+                                <HomeSidebar />
+                            </Box>
+                            <CustomStackFullWidth sx={{ minWidth: 0,marginTop:{xs:"1.5rem",md:"1.5rem"}      }}>
+                                <CustomPageTitleSubtitle
+                                    title={name || t('Category')}
+                                    subtitle={t(
+                                        'Browse foods and restaurants in this category — refine with filters to find your perfect match.'
+                                    )}
+                                />
+                                <CategoryDetailsPage
+                                    id={id}
+                                    data={data}
+                                    category_id={category_id}
+                                    setCategoryId={setCategoryId}
+                                    resData={resData}
+                                    offset={offset}
+                                    type={type}
+                                    setType={setType}
+                                    page_limit={page_limit}
+                                    setOffset={setOffset}
+                                    name={name}
+                                    filterByData={filterByData}
+                                    setFilterByData={setFilterByData}
+                                    priceAndRating={priceAndRating}
+                                    setPriceAndRating={setPriceAndRating}
+                                    isLoading={isLoading}
+                                />
+                            </CustomStackFullWidth>
+                        </Box>
                     </CustomContainer>
                 </HomeGuard>
             </NoSsr>

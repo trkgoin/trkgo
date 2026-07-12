@@ -26,11 +26,15 @@ class CustomDocument extends Document {
                 async
             />
             <script
-                type="text/javascript"
-                src="https://appleid.cdn-apple.com/appleauth/static/jsapi/appleid/1/en_US/appleid.auth.js"
-                async
-            />
+            type="text/javascript"
+            src="https://appleid.cdn-apple.com/appleauth/static/jsapi/appleid/1/en_US/appleid.auth.js"
+            async
+          />
             <meta name="theme-color" content="#111827" />
+            <meta
+                name="viewport"
+                content="width=device-width, initial-scale=1, viewport-fit=cover"
+            />
 
             {/* ✅ Analytics scripts */}
             {analyticsConfig.google_tag_manager && (

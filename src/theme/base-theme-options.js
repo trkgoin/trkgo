@@ -9,6 +9,15 @@ export const baseThemeOptions = {
         },
     },
     components: {
+        MuiContainer: {
+            styleOverrides: {
+                maxWidthLg: {
+                    '@media (min-width: 1200px)': {
+                        maxWidth: 'min(1440px, calc(100vw - 64px))',
+                    },
+                },
+            },
+        },
         MuiAvatar: {
             styleOverrides: {
                 root: {
@@ -92,6 +101,13 @@ export const baseThemeOptions = {
                 },
             },
         },
+        // MuiTextField: {
+        //     styleOverrides: {
+        //         root: {
+        //             height: "60px",
+        //         },
+        //     },
+        // },
         MuiCssBaseline: {
             styleOverrides: {
                 '*': {
@@ -112,6 +128,8 @@ export const baseThemeOptions = {
                     minHeight: '100%',
                     width: '100%',
                     textTransform: 'capitalize',
+
+
                 },
                 '#__next': {
                     display: 'flex',
@@ -124,7 +142,7 @@ export const baseThemeOptions = {
                     pointerEvents: 'none',
                 },
                 '#nprogress .bar': {
-                    backgroundColor: '#E20074',
+                    backgroundColor: '#5048E5',
                     height: 3,
                     left: 0,
                     position: 'fixed',
@@ -149,6 +167,17 @@ export const baseThemeOptions = {
                 },
             },
         },
+        // MuiIconButton: {
+        //     styleOverrides: {
+        //         // root: {
+        //         //     borderRadius: 8,
+        //         //     // padding: 8,
+        //         // },
+        //         // sizeSmall: {
+        //         //     padding: 4,
+        //         // },
+        //     },
+        // },
         MuiLinearProgress: {
             styleOverrides: {
                 root: {
@@ -176,7 +205,7 @@ export const baseThemeOptions = {
             styleOverrides: {
                 root: {
                     '&:hover': {
-                        backgroundColor: 'rgba(226, 0, 116, 0.05)',
+                        backgroundColor: 'rgba(239, 120, 34, 0.05)',
                     },
                 },
             },
@@ -232,6 +261,9 @@ export const baseThemeOptions = {
                     textTransform: 'none',
                     marginLeft: 2,
                     marginRight: 2,
+                    // '& + &': {
+                    //     marginLeft: 24,
+                    // },
                 },
             },
         },
@@ -271,6 +303,7 @@ export const baseThemeOptions = {
             },
         },
     },
+    // direction: 'ltr',
     shape: {
         borderRadius: 8,
     },
@@ -334,6 +367,7 @@ export const baseThemeOptions = {
             fontWeight: 600,
             fontSize: '1rem',
             lineHeight: 1.188,
+            //letterSpacing: '10px',
         },
         h5: {
             fontWeight: 600,

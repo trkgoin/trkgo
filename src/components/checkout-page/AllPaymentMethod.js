@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { CustomStackFullWidth } from '@/styled-components/CustomStyles.style'
 import {
     Stack,
@@ -13,6 +13,7 @@ import {
     Box,
     TextField,
     Collapse,
+    IconButton,
 } from '@mui/material'
 import { PymentTitle } from './CheckOut.style'
 import { t } from 'i18next'
@@ -209,10 +210,21 @@ const AllPaymentMethod = ({
     changeAmount,
     openModal,
     orderType,
+    // Bottom button label. Defaults to 'Select' so existing checkout usage is
+    // unchanged; callers can override (e.g. 'Proceed' for the subscription flow).
+    submitLabel = 'Select',
+    // When true, the Cash-on-Delivery option is hidden everywhere it would
+    // normally render. Default false to keep existing checkout behavior.
+    hideCashOnDelivery = false,
+    // When true, the wallet / partial-payment option is hidden. Subscription
+    // flow uses this to suppress wallet when the plan price exceeds the
+    // user's wallet balance (a non-recoverable case for that flow).
+    hideWallet = false,
 }) => {
     const theme = useTheme()
     const [expanded, setExpanded] = useState(false)
     const [openOfflineOptions, setOpenOfflineOptions] = useState(false)
+    const offlineSectionRef = useRef(null)
     useEffect(() => {
         if (selected?.name === 'cash_on_delivery') {
             setExpanded(true)
@@ -235,7 +247,21 @@ const AllPaymentMethod = ({
     }, [selected])
 
     const handleClickOffline = () => {
-        setOpenOfflineOptions(!openOfflineOptions)
+        const next = !openOfflineOptions
+        setOpenOfflineOptions(next)
+        setIsCheckedOffline(next)
+        if (next) {
+            const firstOption = offlinePaymentOptions?.[0]
+            if (firstOption) {
+                handleClickOfflineItem(firstOption)
+            }
+            requestAnimationFrame(() => {
+                offlineSectionRef.current?.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'nearest',
+                })
+            })
+        }
     }
 
     const handleClickOfflineItem = (item) => {
@@ -256,12 +282,12 @@ const AllPaymentMethod = ({
         currencySymbolDirection = global.currency_symbol_direction
         digitAfterDecimalPoint = global.digit_after_decimal_point
     }
-
+    console.log({ global });
     return (
-        <Stack width="100%" padding="2rem" spacing={2.4}>
-            <button className="closebtn" onClick={handleClose}>
+        <Stack width="100%" padding={{xs:"1rem", sm: "1.5rem", md: "2rem"}} spacing={2.4}>
+           {/* <IconButton>
                 <CloseIcon fontSize="18px" />
-            </button>
+            </IconButton> */}
 
             <Stack padding="0px 10px">
                 <Stack
@@ -331,10 +357,12 @@ const AllPaymentMethod = ({
                                     },
                                 }}
                             >
-                                {subscriptionStates.order !== '1' &&
+                                {!hideWallet &&
+                                    subscriptionStates.order !== '1' &&
                                     global?.customer_wallet_status === 1 &&
                                     walletAmount > 0 &&
-                                    global?.partial_payment_status === 1 && (
+                                    (global?.partial_payment_status === 1 ||
+                                        walletAmount >= totalAmount) && (
                                         <PartialPayment
                                             offLineWithPartial={
                                                 offLineWithPartial
@@ -474,11 +502,8 @@ const AllPaymentMethod = ({
                             >
                                 {usePartialPayment ? (
                                     <>
-                                        {global?.cash_on_delivery &&
-                                            (global?.partial_payment_method ===
-                                                'both' ||
-                                                global?.partial_payment_method ===
-                                                'cod') ? (
+                                        {!hideCashOnDelivery && global?.cash_on_delivery &&
+                                            (global?.partial_payment_method?.includes('cash_on_delivery')) ? (
                                             <PayButton
                                                 value="cash_on_delivery"
                                                 paymentMethod={selected?.name}
@@ -550,7 +575,7 @@ const AllPaymentMethod = ({
                                     </>
                                 ) : (
                                     <>
-                                        {global?.cash_on_delivery ? (
+                                        {!hideCashOnDelivery && global?.cash_on_delivery ? (
                                             <PayButton
                                                 value="cash_on_delivery"
                                                 paymentMethod={selected?.name}
@@ -635,17 +660,15 @@ const AllPaymentMethod = ({
 
                                     <Grid container rowGap="2.1rem">
                                         {global?.digital_payment &&
-                                            (global?.partial_payment_method ===
-                                                'digital_payment' ||
-                                                global?.partial_payment_method ===
-                                                'both') && (
+                                            (global?.partial_payment_method?.includes('digital_payment')) && (
                                                 <>
                                                     {global?.active_payment_method_list?.map(
                                                         (item, index) => {
                                                             return (
                                                                 <Grid
                                                                     item
-                                                                    md={6}
+                                                                    xs={12}
+                                                                    sm={6}
                                                                     key={index}
                                                                 >
                                                                     <PaymentMethodCard
@@ -696,10 +719,12 @@ const AllPaymentMethod = ({
                                 padding: '0px 10px',
                             }}
                         >
-                            {subscriptionStates.order !== '1' &&
+                            {!hideWallet &&
+                                subscriptionStates.order !== '1' &&
                                 global?.customer_wallet_status === 1 &&
                                 walletAmount > 0 &&
-                                global?.partial_payment_status === 1 && (
+                                (global?.partial_payment_status === 1 ||
+                                    walletAmount >= totalAmount) && (
                                     <Box
                                         sx={{
                                             flex: {
@@ -801,7 +826,7 @@ const AllPaymentMethod = ({
                                     },
                                 }}
                             >
-                                {global?.cash_on_delivery ? (
+                                {!hideCashOnDelivery && global?.cash_on_delivery ? (
                                     <PayButton
                                         value="cash_on_delivery"
                                         paymentMethod={selected?.name}
@@ -909,9 +934,8 @@ const AllPaymentMethod = ({
                                                 {global?.active_payment_method_list?.map(
                                                     (item, index) => {
                                                         return (
-                                                            <Grid item md={6}>
+                                                            <Grid item xs={12} sm={6} key={index}>
                                                                 <PaymentMethodCard
-                                                                    key={index}
                                                                     paymentType={
                                                                         item?.gateway_title
                                                                     }
@@ -952,24 +976,33 @@ const AllPaymentMethod = ({
                     typeof offlinePaymentOptions !== 'undefined' &&
                     Object?.keys(offlinePaymentOptions)?.length !== 0 &&
                     subscriptionStates.order !== '1' &&
-                    (usePartialPayment ? (global?.partial_payment_method === 'both' || global?.partial_payment_method === 'offline_payment') : true) && (
+                    (usePartialPayment ? (global?.partial_payment_method?.includes('offline_payment')) : true) && (
                         <CustomStackFullWidth
-                            padding="10px 10px 10px 15px"
-                            borderRadius="10px"
-                            backgroundColor={alpha(
-                                theme.palette.primary.main,
-                                0.1
-                            )}
+                            ref={offlineSectionRef}
+                            sx={{
+                                padding: '10px 10px 10px 15px',
+                                borderRadius: '10px',
+                                backgroundColor: alpha(
+                                    theme.palette.primary.main,
+                                    0.1
+                                ),
+                                mt: { xs: '16px', sm: '20px' },
+                                mx: '10px',
+                                width: 'auto',
+                            }}
                         >
                             <CustomStackFullWidth gap="15px">
                                 <CustomStackFullWidth
                                     flexDirection="row"
                                     justifyContent="space-between"
+                                    alignItems="center"
                                 >
                                     <FormControl
                                         sx={{
                                             marginRight: { xs: '0px' },
                                             marginLeft: { xs: '5px' },
+                                            flex: 1,
+                                            minWidth: 0,
                                         }}
                                     >
                                         <RadioGroup
@@ -982,14 +1015,16 @@ const AllPaymentMethod = ({
                                                     color: (theme) =>
                                                         theme.palette
                                                             .neutral[1000],
+                                                    margin: 0,
+                                                    alignItems: 'center',
                                                 }}
                                                 value="Pay Offline"
                                                 control={
                                                     <Radio
                                                         sx={{
                                                             padding: {
-                                                                xs: '2px',
-                                                                md: '10px',
+                                                                xs: '4px',
+                                                                md: '8px',
                                                             },
                                                         }}
                                                         checked={
@@ -1004,12 +1039,17 @@ const AllPaymentMethod = ({
                                                     <Typography
                                                         fontSize="14px"
                                                         fontWeight="500"
+                                                        sx={{
+                                                            display: 'inline-flex',
+                                                            alignItems: 'center',
+                                                            flexWrap: 'wrap',
+                                                            gap: '4px',
+                                                        }}
                                                     >
                                                         {t('Pay Offline')}
                                                         <Typography
                                                             component="span"
                                                             fontSize="10px"
-                                                            ml="5px"
                                                             color={
                                                                 theme.palette
                                                                     .neutral[1000]
@@ -1034,10 +1074,12 @@ const AllPaymentMethod = ({
                                         )}
                                     >
                                         <InfoIcon
-                                            fontSize="16px"
                                             sx={{
+                                                fontSize: '18px',
                                                 color: theme.palette.primary
                                                     .main,
+                                                flexShrink: 0,
+                                                ml: '8px',
                                             }}
                                         />
                                     </Tooltip>
@@ -1081,7 +1123,7 @@ const AllPaymentMethod = ({
             </SimpleBar>
             <Stack paddingTop="30px">
                 <PrimaryButton variant="contained" onClick={handleSubmit}>
-                    {t('Select')}
+                    {t(submitLabel)}
                 </PrimaryButton>
             </Stack>
         </Stack>

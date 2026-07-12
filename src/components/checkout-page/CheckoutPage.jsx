@@ -7,6 +7,7 @@ import {
     formatPhoneNumber,
     getAmount,
     getCouponDiscount,
+    getDeliveryFees,
     getFinalTotalPrice,
     getProductDiscount,
     getSubTotalPrice,
@@ -90,6 +91,7 @@ import { CouponApi } from '@/hooks/react-query/config/couponApi'
 import HaveCoupon from '@/components/checkout-page/HaveCoupon'
 import AddIcon from '@mui/icons-material/Add'
 import money from '@/components/checkout-page/assets/fi_2704332.png'
+import useGetProActiveOffer from '@/hooks/react-query/pro-plans/useGetProActiveOffer'
 
 let currentDate = moment().format('YYYY/MM/DD HH:mm')
 let nextday = moment(currentDate).add(1, 'days').format('YYYY/MM/DD')
@@ -120,7 +122,9 @@ const CheckoutPage = ({ isDineIn }) => {
     const theme = useTheme()
     const offlineFormRef = useRef(null)
     const { t } = useTranslation()
-    const { global, couponInfo } = useSelector((state) => state.globalSettings)
+    const { global, couponInfo, couponType } = useSelector(
+        (state) => state.globalSettings
+    )
 
     const {
         cartList,
@@ -150,6 +154,7 @@ const CheckoutPage = ({ isDineIn }) => {
     const [openModal, setOpenModal] = useState(false)
     const [openPartialModel, setOpenPartialModel] = useState(false)
     const [deliveryTip, setDeliveryTip] = useState(0)
+    const [selectedDeliveryOption, setSelectedDeliveryOption] = useState(null)
     const [selected, setSelected] = useState({})
     const [paymentMethodDetails, setPaymentMethodDetails] = useState({
         name: 'cash_on_delivery',
@@ -179,8 +184,15 @@ const CheckoutPage = ({ isDineIn }) => {
             dispatch(setIsNeedLoad(data?.reload_home))
         }
     }, [data])
+    console.log({selectedDeliveryOption});
+    
     const { data: offlinePaymentOptions, refetch: OfflinePaymentRefetch } =
         useGetOfflinePaymentOptions({})
+
+    useEffect(() => {
+        // Debug selected delivery option changes during checkout.
+        console.log('selectedDeliveryOption:', selectedDeliveryOption)
+    }, [selectedDeliveryOption])
 
     useEffect(() => {
         OfflinePaymentRefetch()
@@ -201,6 +213,7 @@ const CheckoutPage = ({ isDineIn }) => {
     const text1 = t('You can not Order more then')
     const text2 = t('on COD order')
     const { page } = router.query
+    const checkoutCartList = page === 'campaign' ? campFoodList : cartList
     let currencySymbol
     let currencySymbolDirection
     let digitAfterDecimalPoint
@@ -210,7 +223,6 @@ const CheckoutPage = ({ isDineIn }) => {
         currencySymbolDirection = global.currency_symbol_direction
         digitAfterDecimalPoint = global.digit_after_decimal_point
     }
-
     currentLatLng = JSON.parse(window.localStorage.getItem('currentLatLng'))
     const { data: zoneData } = useQuery(
         ['zoneId', location],
@@ -257,6 +269,19 @@ const CheckoutPage = ({ isDineIn }) => {
     useEffect(() => {
         extraChargeRefetch()
     }, [distanceData])
+    const deliveryFeeForOptions = getDeliveryFees(
+        restaurantData,
+        global,
+        checkoutCartList,
+        distanceData,
+        couponDiscount,
+        couponType,
+        orderType,
+        zoneData?.data?.zone_data,
+        restaurantData?.data,
+        address,
+        Number(extraCharge) || 0
+    )
     const handleChange = (event) => {
         setDayNumber(event.target.value)
     }
@@ -276,6 +301,78 @@ const CheckoutPage = ({ isDineIn }) => {
             onError: onSingleErrorResponse,
         }
     )
+
+    const proStatus = Number(customerData?.data?.pro_status) === 1
+    const { data: proActiveOffer } = useGetProActiveOffer({
+        enabled: proStatus,
+    })
+console.log({proActiveOffer});
+
+    // Active-offer payload shape varies by benefit.type:
+    //   - 'discount'     → { percentage, max_amount, min_order_amount }
+    //   - 'delivery_fee' → { offer_type: 'full_free' | 'partial_free',
+    //                        charge_discount_percentage, min_order_amount }
+    //   - 'coupon'       → handled by the existing coupon flow elsewhere;
+    //                      proSavedAmount stays 0 to avoid double-counting.
+    const proCouponDiscount =
+        couponDiscount && couponDiscount.coupon_type !== 'free_delivery'
+            ? getCouponDiscount(couponDiscount, restaurantData, checkoutCartList) || 0
+            : 0
+    const proCartSubtotal = Math.max(
+        0,
+        (checkoutCartList?.reduce((sum, item) => sum + (item?.totalPrice || 0), 0) || 0) -
+            proCouponDiscount
+    )
+    const proBenefit = proActiveOffer?.benefit
+    const proBenefitType = proBenefit?.type
+    const proOfferType = proBenefit?.offer_type
+    const proBenefitPercentage = Number(proBenefit?.percentage) || 0
+    const proBenefitMaxAmount = Number(proBenefit?.max_amount) || 0
+    const proChargeDiscountPct =
+        Number(proBenefit?.charge_discount_percentage) || 0
+    const proBenefitMinOrderAmount = Number(proBenefit?.min_order_amount) || 0
+    const proOfferActive =
+        proStatus &&
+        proActiveOffer?.status === true &&
+        proCartSubtotal >= proBenefitMinOrderAmount
+
+    let proSavedAmount = 0
+    let proSavedLabel = ''
+    console.log({proBenefitMinOrderAmount,proCartSubtotal,cartList,campFoodList});
+    
+    // When a free-delivery coupon is applied alongside a Pro "discount"
+    // benefit, the Pro savings row would double up against the coupon's
+    // free-delivery line — suppress the cart-discount calculation in that
+    // edge case so we don't show the "Pro User Discount" row.
+    const isFreeDeliveryCoupon =
+        couponDiscount?.coupon_type === 'free_delivery'
+
+    if (proOfferActive) {
+        if (proBenefitType === 'discount' && !isFreeDeliveryCoupon) {
+            const proRawDiscount =
+                (proCartSubtotal * proBenefitPercentage) / 100
+            proSavedAmount =
+                proBenefitMaxAmount > 0
+                    ? Math.min(proRawDiscount, proBenefitMaxAmount)
+                    : proRawDiscount
+            proSavedLabel = t('Pro User Discount')
+        } else if (proBenefitType === 'delivery_fee') {
+            // deliveryFeeForOptions is computed above (after getDeliveryFees),
+            // so the numeric fee is available to multiply against here.
+            const fee = Number(deliveryFeeForOptions) || 0
+            if (proOfferType === 'full_free') {
+                proSavedAmount = fee
+                proSavedLabel = t('Free Delivery (Pro)')
+            } else if (proOfferType === 'partial_free') {
+                proSavedAmount = (fee * proChargeDiscountPct) / 100
+                proSavedLabel = `${proChargeDiscountPct}% ${t(
+                    'off Delivery (Pro)'
+                )}`
+            }
+        }
+    }
+    console.log({proSavedLabel});
+    
     useEffect(() => {
         orderId && refetchNotification()
     }, [orderId])
@@ -416,7 +513,12 @@ const CheckoutPage = ({ isDineIn }) => {
         return {
             cart: carts,
             ...address,
-            schedule_at: scheduleAt === 'now' ? null : scheduleAt,
+            schedule_at:
+                scheduleAt === 'now'
+                    ? null
+                    : moment(scheduleAt)
+                        .subtract(1, 'minutes')
+                        .format('YYYY-MM-DD HH:mm'),
             //additional address
             address_type: !getToken()
                 ? guestUserInfo?.address_type
@@ -440,12 +542,16 @@ const CheckoutPage = ({ isDineIn }) => {
             coupon_discount_title: couponDiscount?.title,
             discount_amount: getProductDiscount(productList),
             distance: handleDistance(
-                distanceData?.data,
+                distanceData,
                 restaurantData?.data,
                 address
             ),
             order_amount: totalAmount,
             dm_tips: deliveryTip,
+            ...(couponDiscount?.coupon_type !== 'free_delivery' && {
+                delivery_id: selectedDeliveryOption?.id,
+                delivery_type: selectedDeliveryOption?.deliveryType,
+            }),
             subscription_order: subscriptionStates.order,
             subscription_type: subscriptionStates.type,
             subscription_days: JSON.stringify(subscriptionStates.days),
@@ -489,6 +595,7 @@ const CheckoutPage = ({ isDineIn }) => {
         couponDiscount?.discount,
         cartList,
         extraPackagingCharge,
+        selectedDeliveryOption?.id,
     ])
     const orderPlaceMutation = (
         carts,
@@ -511,7 +618,8 @@ const CheckoutPage = ({ isDineIn }) => {
 
     const handlePlaceOrder = () => {
         let productList = page === 'campaign' ? campFoodList : cartList
-
+        if(!restaurantData?.data?.active)
+            return toast.error(t('Restaurant is currently closed'))
         let isAvailable =
             page === 'campaign'
                 ? true
@@ -1156,6 +1264,7 @@ const CheckoutPage = ({ isDineIn }) => {
             onError: onSingleErrorResponse,
         }
     )
+console.log({selectedDeliveryOption});
 
     return (
         <Grid
@@ -1172,6 +1281,7 @@ const CheckoutPage = ({ isDineIn }) => {
                             token={token}
                             global={global}
                             restaurantData={restaurantData}
+                            deliveryFee={deliveryFeeForOptions}
                             setOrderType={setOrderType}
                             orderType={orderType}
                             setAddress={setAddress}
@@ -1190,6 +1300,16 @@ const CheckoutPage = ({ isDineIn }) => {
                             setPaymentMethodDetails={setPaymentMethodDetails}
                             setUsePartialPayment={setUsePartialPayment}
                             setSwitchToWallet={setSwitchToWallet}
+                            zoneData={zoneData?.data?.zone_data}
+                            setSelectedDeliveryOption={
+                                setSelectedDeliveryOption
+                            }
+                            couponDiscount={couponDiscount}
+                            isProFullFreeDelivery={
+                                proBenefitType === 'delivery_fee' &&
+                                proOfferType === 'full_free' &&
+                                proSavedAmount > 0
+                            }
                         />
                         {orderType === 'dine_in' && (
                             <CustomPaperBigCard padding=".5rem">
@@ -1484,6 +1604,11 @@ const CheckoutPage = ({ isDineIn }) => {
                             distanceLoading={distanceLoading}
                             taxData={taxData}
                             handleCouponDiscount={handleCouponDiscount}
+                            selectedDeliveryOption={selectedDeliveryOption}
+                            proSavedAmount={proSavedAmount}
+                            proSavedLabel={proSavedLabel}
+                            proBenefitType={proBenefitType}
+                            proOfferType={proOfferType}
                         />
                     </Stack>
                 </CustomPaperBigCard>

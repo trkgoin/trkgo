@@ -1,10 +1,9 @@
 import React, { useEffect } from 'react'
 import { Grid } from '@mui/material'
-import FoodCard from '../food-card/FoodCard'
+import NewFoodCard from '@/components/new-food-card/NewFoodCard'
 import { useSelector } from 'react-redux'
 import CustomePagination from '../pagination/Pagination'
 import useMediaQuery from '@mui/material/useMediaQuery'
-import { useRouter } from 'next/router'
 export default function ProductList({
     product_list,
     page_limit = 10,
@@ -12,18 +11,20 @@ export default function ProductList({
     setOffset,
     productType,
 }) {
-    const router = useRouter();
     const { global } = useSelector((state) => state.globalSettings)
     const matchesToMd = useMediaQuery('(max-width:1200px)')
-    
+
     useEffect(() => {
-        if (offset !== undefined) {
-            const url = `${router.asPath}&page=${offset}`;
-            window.history.replaceState(null, "", url);
-        }
-    }, [offset]);
-    
-    
+        if (offset === undefined || typeof window === 'undefined') return
+        const url = new URL(window.location.href)
+        url.searchParams.set('page', String(offset))
+        window.history.replaceState(
+            null,
+            '',
+            `${url.pathname}?${url.searchParams.toString()}`
+        )
+    }, [offset])
+
     return (
         <>
             {productType === 'campaigns' ? (
@@ -38,20 +39,18 @@ export default function ProductList({
                                 <Grid
                                     key={product?.id}
                                     item
-                                    md={3}
+                                    lg={2}
+                                    md={matchesToMd ? 3 : 2}
                                     sm={4}
                                     xs={6}
                                 >
-                                    <FoodCard
-                                        isRestaurantDetails={true}
-                                        isShop={true}
-                                        sm={1}
-                                        xs={1}
+                                    <NewFoodCard
                                         product={product}
                                         productImageUrl={
                                             global?.base_urls
                                                 ?.campaign_image_url
                                         }
+                                        campaign={true}
                                     />
                                 </Grid>
                             )
@@ -70,14 +69,12 @@ export default function ProductList({
                                 <Grid
                                     key={product?.id}
                                     item
-                                    md={matchesToMd ? 2.4 : 2.4}
+                                    md={matchesToMd ? 2.4 : 2}
                                     sm={4}
                                     xs={6}
-
                                 >
-                                    <FoodCard
+                                    <NewFoodCard
                                         product={product}
-                                        isRestaurantDetails={true}
                                         productImageUrl={
                                             global?.base_urls?.product_image_url
                                         }
