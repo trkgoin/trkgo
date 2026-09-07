@@ -61,10 +61,5 @@ export const searchMockData = [
         value: 'currentlyAvailable',
         isActive: false,
     },
-    {
-        id: 10,
-        name: 'Halal',
-        value: 'halal',
-        isActive: false,
-    }
+    // Halal filter removed — not relevant for the Indian market.
 ]

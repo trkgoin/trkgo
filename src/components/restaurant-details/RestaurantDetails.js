@@ -63,7 +63,7 @@ const restaurantFoodMockData = [
         value: 'currently_available',
         isActive: false,
     },
-    { id: 17, name: 'Halal', value: 'halal', isActive: false },
+    // Halal filter removed — not relevant for the Indian market.
 ]
 
 const RestaurantDetails = ({ restaurantData, configData }) => {

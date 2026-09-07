@@ -30,7 +30,7 @@ const mockData = [
     { id: 13, name: 'Discounted', value: 'discounted', isActive: false },
     { id: 15, name: 'New Arrivals', value: 'new_arrivals', isActive: false },
     { id: 16, name: 'Currently Available', value: 'currently_available', isActive: false },
-    { id: 17, name: 'Halal', value: 'halal', isActive: false },
+    // Halal filter removed — not relevant for the Indian market.
 ]
 
 const normalizeToken = (value = '') =>
