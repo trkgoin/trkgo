@@ -75,7 +75,7 @@ const SuccessStoreRegistration = ({ flag }) => {
                             sx={{ color: theme.palette.neutral[500] }}
                         >
                             {t(
-                                'Your restaurant application has been successfully submitted to Stackfood. Please check your email — once the admin reviews your request, you’ll receive a panel access link to set up your restaurant and start serving hungry customers.'
+                                'Your restaurant application has been successfully submitted to TrkGo. Please check your email — once the admin reviews your request, you’ll receive a panel access link to set up your restaurant and start serving hungry customers.'
                             )}
                         </Typography>
                     </Stack>

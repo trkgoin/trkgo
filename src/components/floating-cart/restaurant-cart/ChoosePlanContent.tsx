@@ -221,7 +221,7 @@ const ChoosePlanContent: React.FC<ChoosePlanContentProps> = ({
         return mapped.length > 0 ? mapped : FALLBACK_BENEFITS
     }, [response])
 
-    const headerTitle = response.pro_brand ?? 'StackFood Pro'
+    const headerTitle = response.pro_brand ?? 'TrkGo Pro'
     const headerSubtitle = 'Save more on every order'
 
     const theme = useTheme()
