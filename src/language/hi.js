@@ -326,4 +326,7 @@ export const hindi = {
     'What happens when the internet goes?': 'इंटरनेट चला जाए तो क्या होगा?',
     'What do I need to start?': 'शुरू करने के लिए क्या चाहिए?',
     'Already have a restaurant? See the TrkGo POS': 'रेस्टोरेंट पहले से है? TrkGo POS देखिए',
+    'WhatsApp us': 'WhatsAppकीजिए',
+    'Or call us': 'या फ़ोन कीजिए',
+    'Call': 'फ़ोन',
 }

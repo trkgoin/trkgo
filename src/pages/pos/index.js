@@ -31,7 +31,7 @@ const Index = ({ configData, metaData, pathName }) => {
                 robotsMeta={metadata.robotsMeta}
             />
             <NoSsr>
-                <PosLanding />
+                <PosLanding configData={configData} />
             </NoSsr>
         </>
     )

@@ -16,6 +16,21 @@ import CustomContainer from '../container'
  */
 
 const PANEL_URL = 'https://manage.trkgo.in'
+const WHATSAPP_TEXT = 'Hi TrkGo, I want the POS for my restaurant.'
+
+/**
+ * The business phone as WhatsApp wants it: digits only, with the country code.
+ * A ten-digit Indian number is stored without one, so add it rather than send the
+ * owner to a dead wa.me link.
+ */
+const waNumber = (phone) => {
+    const digits = String(phone || '').replace(/\D/g, '')
+
+    if (!digits) return null
+    if (digits.length === 10) return '91' + digits
+
+    return digits
+}
 
 const PLANS = [
     {
@@ -118,9 +133,22 @@ const FAQ = [
     },
 ]
 
-const PosLanding = () => {
+const PosLanding = ({ configData }) => {
     const theme = useTheme()
     const { t } = useTranslation()
+
+    const phone = configData?.phone
+    const wa = waNumber(phone)
+    const waHref = wa ? `https://wa.me/${wa}?text=${encodeURIComponent(WHATSAPP_TEXT)}` : null
+
+    const whatsappSx = {
+        background: '#25D366',
+        color: '#fff',
+        fontWeight: 800,
+        px: 3.5,
+        py: 1.2,
+        '&:hover': { background: '#1EBE5B' },
+    }
 
     const card = {
         height: '100%',
@@ -178,6 +206,12 @@ const PosLanding = () => {
                                 </Button>
                             </Link>
 
+                            {waHref && (
+                                <Button href={waHref} target="_blank" rel="noopener" variant="contained" sx={whatsappSx}>
+                                    {t('WhatsApp us')}
+                                </Button>
+                            )}
+
                             <Button
                                 href={PANEL_URL}
                                 target="_blank"
@@ -195,6 +229,19 @@ const PosLanding = () => {
                                 {t('Restaurant sign in')}
                             </Button>
                         </Stack>
+
+                        {phone && (
+                            <Typography sx={{ mt: 2, fontSize: '.88rem', opacity: 0.95 }}>
+                                {t('Or call us')}:{' '}
+                                <Box
+                                    component="a"
+                                    href={`tel:${phone}`}
+                                    sx={{ color: '#fff', fontWeight: 800, textDecoration: 'underline' }}
+                                >
+                                    {phone}
+                                </Box>
+                            </Typography>
+                        )}
                     </Box>
                 </CustomContainer>
             </Box>
@@ -341,21 +388,26 @@ const PosLanding = () => {
                             </Button>
                         </Link>
 
-                        <Link href="/help-and-support" style={{ textDecoration: 'none' }}>
-                            <Button
-                                variant="outlined"
-                                sx={{
-                                    color: '#fff',
-                                    borderColor: 'rgba(255,255,255,.7)',
-                                    fontWeight: 700,
-                                    px: 3.5,
-                                    py: 1.2,
-                                    '&:hover': { borderColor: '#fff', background: 'rgba(255,255,255,.1)' },
-                                }}
-                            >
-                                {t('Talk to us')}
+                        {waHref && (
+                            <Button href={waHref} target="_blank" rel="noopener" variant="contained" sx={whatsappSx}>
+                                {t('WhatsApp us')}
                             </Button>
-                        </Link>
+                        )}
+
+                        <Button
+                            href={phone ? `tel:${phone}` : '/help-and-support'}
+                            variant="outlined"
+                            sx={{
+                                color: '#fff',
+                                borderColor: 'rgba(255,255,255,.7)',
+                                fontWeight: 700,
+                                px: 3.5,
+                                py: 1.2,
+                                '&:hover': { borderColor: '#fff', background: 'rgba(255,255,255,.1)' },
+                            }}
+                        >
+                            {phone ? `${t('Call')} ${phone}` : t('Talk to us')}
+                        </Button>
                     </Stack>
                 </Box>
             </CustomContainer>
