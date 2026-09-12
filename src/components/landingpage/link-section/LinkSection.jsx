@@ -66,6 +66,27 @@ console.log({restaurant_section,global});
                                 ?.description
                         }
                     </Typography>
+
+                    {/* Restaurant owners look for the POS here, not in the footer. */}
+                    <Typography
+                        textAlign="center"
+                        component="p"
+                        mb={1}
+                        sx={{ fontSize: { xs: '14px', md: '15px' } }}
+                    >
+                        <Box
+                            component="a"
+                            href="/pos"
+                            sx={{
+                                color: theme.palette.primary.main,
+                                fontWeight: 700,
+                                textDecoration: 'none',
+                                '&:hover': { textDecoration: 'underline' },
+                            }}
+                        >
+                            {t('Already have a restaurant? See the TrkGo POS')} &rarr;
+                        </Box>
+                    </Typography>
                 </Grid>
                 {restaurant_section?.react_restaurant_section?.status === 1 &&
                 global?.toggle_restaurant_registration ? (

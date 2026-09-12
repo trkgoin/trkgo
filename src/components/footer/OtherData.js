@@ -1,5 +1,11 @@
 export const OtherData = [
     {
+        // For restaurant owners, not diners: the POS page they read before signing up.
+        name: 'Restaurant POS',
+        value: 'restaurant-pos',
+        link: '/pos',
+    },
+    {
         name: 'Privacy Policy',
         value: 'privacy-policy',
         link: '/privacy-policy',
