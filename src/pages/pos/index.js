@@ -1,5 +1,5 @@
 import React from 'react'
-import { CssBaseline, NoSsr } from '@mui/material'
+import { CssBaseline } from '@mui/material'
 import Meta from '../../components/Meta'
 import PosLanding from '../../components/pos/PosLanding'
 import { getCommonServerSideProps } from '@/helpers/serverSidePropsHelper'
@@ -30,9 +30,13 @@ const Index = ({ configData, metaData, pathName }) => {
                 pathName={pathName}
                 robotsMeta={metadata.robotsMeta}
             />
-            <NoSsr>
-                <PosLanding configData={configData} />
-            </NoSsr>
+            {/*
+                Rendered on the server, unlike the rest of the site: this is the one
+                page that has to be found on Google, and a NoSsr wrapper would serve
+                search engines an empty body. Nothing here touches the browser, so
+                there is nothing to defer.
+            */}
+            <PosLanding configData={configData} />
         </>
     )
 }
