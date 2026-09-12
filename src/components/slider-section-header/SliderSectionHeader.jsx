@@ -16,7 +16,7 @@ const navBtnSx = {
         backgroundColor: (theme) => theme.palette.primary.main,
         color: '#fff',
         borderColor: (theme) => theme.palette.primary.main,
-        boxShadow: '0 8px 16px -4px rgba(255,117,24,.38)',
+        boxShadow: '0 8px 16px -4px rgba(226, 0, 116,.38)',
         transform: 'translateY(-1px)',
     },
     '&.Mui-disabled': {

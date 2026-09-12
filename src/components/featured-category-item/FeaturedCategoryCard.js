@@ -99,7 +99,7 @@ const FeaturedCategoryCard = ({
                         justifyContent: 'center',
                         border: (theme) => `3px solid ${theme.palette.neutral[100]}`,
                         borderColor: (theme) => theme.palette.neutral[100],
-                        backgroundColor: '#FFF4EC',
+                        backgroundColor: '#FEF1F8',
                         borderRadius: '50%',
                         padding: 0,
                         overflow: 'hidden',

@@ -12,10 +12,10 @@ const neutral = {
     1000: '#141313',
     1100: '#FBFBFB',
     1200: '#4B566B',
-    1300: '#EF78224D',
+    1300: '#E200744D',
     1400: 'rgba(255, 255, 255, 0.8)',
-    1500: 'rgba(239, 120, 34, 0.3)',
-    1600: '#FFEBDD',
+    1500: 'rgba(226, 0, 116, 0.3)',
+    1600: '#FDE7F2',
     1700: '#fff5cf',
     1800: '#FCFCFC',
 }
@@ -57,29 +57,29 @@ const background = {
 const newsletterBG = '#2287FD'
 
 const divider = '#E6E8F0'
-// main: '#EF7822',
-// secondary main: '#ff903f',
+// main: '#E20074',
+// secondary main: '#FF3D9A',
 const primary = {
-    main: '#FF7918',
-    light: 'rgba(255, 121, 24, 0.60)',
-    dark: '#a3460a',
+    main: '#E20074',
+    light: 'rgba(226, 0, 116, 0.60)',
+    dark: '#A8005A',
     contrastText: '#FFFFFF',
-    midPrimary: ' #FFF5ED',
+    midPrimary: ' #FEF1F8',
     overLay: '#000000',
 }
 const searchBoxBg = primary.main
 const secondary = {
-    main: '#934916',
-    light: '#db5c00',
-    semiLight: '#FFFAF6',
-    dark: '#a2684c',
+    main: '#A8005A',
+    light: '#C10064',
+    semiLight: '#FFF7FB',
+    dark: '#A8005A',
     contrastText: '#FFFFFF',
 }
 const whiteContainer = {
     main: '#F9FAFC',
-    light: '#EF7822',
-    dark: '#ff903f',
-    contrastText: '#EF7822',
+    light: '#E20074',
+    dark: '#FF3D9A',
+    contrastText: '#E20074',
 }
 const whiteText = {
     main: '#FFFFFF',
@@ -116,7 +116,7 @@ const error = {
     pureRed: '#DB3022',
 }
 const customColor = {
-    one: '#FF5E00',
+    one: '#E20074',
     two: '#2B95FF',
     three: '#FF686A',
     four: '#5266D0',
@@ -124,11 +124,11 @@ const customColor = {
     six: '#414141',
     seven: '#2C1D13',
     eight: '#FFBE0B',
-    nine: '#FB5607',
+    nine: '#FF3D9A',
     ten: '#FFFFFF',
     eleven: '#039D55',
     twelve: '#334257',
-    thirteen: '#FFE5CD',
+    thirteen: '#FBD9EC',
     fourteen: '#FCEA10',
     fifteen: '#3E594D',
 }
@@ -156,7 +156,7 @@ export const lightThemeOptions = {
                 root: {
                     color: '#FFFFFF',
                     '&.MuiButton-text': {
-                        color: '#EF7822',
+                        color: '#E20074',
                     },
                 },
             },
@@ -291,7 +291,7 @@ export const lightThemeOptions = {
         action: {
             active: neutral[500],
             focus: 'rgba(55, 65, 81, 0.12)',
-            hover: '#ff903f',
+            hover: '#FF3D9A',
             selected: 'rgba(55, 65, 81, 0.08)',
             disabledBackground: 'rgba(55, 65, 81, 0.12)',
             disabled: 'rgba(55, 65, 81, 0.26)',

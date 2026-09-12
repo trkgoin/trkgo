@@ -3,7 +3,7 @@ import { alpha, InputBase, Typography } from '@mui/material'
 import LocationOnIcon from '@mui/icons-material/LocationOn'
 
 const AddressSelectionField = ({ theme, address, t }) => {
-    const borderColor = 'rgba(255, 130, 0, 0.20)'
+    const borderColor = 'rgba(226, 0, 116, 0.20)'
 
     return (
         <InputField

@@ -58,7 +58,7 @@ export const PopularRestaurantCard = styled(Card)(({ theme }) => ({
     padding: '30px',
     boxShadow: `${
         theme.palette.mode === 'light' &&
-        '0px 0px 2px rgba(239, 120, 34, 0.1),0px 6px 12px rgba(239, 120, 34, 0.08)'
+        '0px 0px 2px rgba(226, 0, 116, 0.1),0px 6px 12px rgba(226, 0, 116, 0.08)'
     }`,
     borderRadius: '10px',
     color: `${theme.palette.mode === 'dark' && '#fff'}`,

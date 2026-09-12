@@ -49,7 +49,7 @@ export const CustomChip = styled(Chip)(({ theme, query, value, isSticky }) => {
     const isDark = theme.palette.mode === 'dark'
     const activeBg = isDark
         ? alpha(theme.palette.primary.main, 0.18)
-        : '#FFF4EC'
+        : '#FEF1F8'
     const idleBg = isDark ? theme.palette.background.paper : '#FFFFFF'
     const idleBorder = isDark ? 'rgba(255,255,255,0.14)' : '#E2E8F0'
     const idleColor = isDark ? theme.palette.neutral[300] : '#334155'
@@ -539,7 +539,7 @@ const FilterTag = ({
                         '& .MuiInputBase-root.Mui-focused, & .MuiInputBase-root:focus-within': {
                             borderColor: (theme) =>
                                 theme.palette.primary.main,
-                            boxShadow: '0 0 0 4px rgba(255,117,24,.14)',
+                            boxShadow: '0 0 0 4px rgba(226, 0, 116,.14)',
                         },
                         '& .MuiInputBase-input': {
                             padding: '0 !important',
@@ -568,7 +568,7 @@ const FilterTag = ({
                         '& .MuiInputAdornment-positionEnd .MuiIconButton-root': {
                             width: 28,
                             height: 28,
-                            backgroundColor: '#FFF4EC',
+                            backgroundColor: '#FEF1F8',
                             '& .MuiSvgIcon-root': {
                                 color: (theme) => theme.palette.primary.main,
                                 fontSize: '16px',

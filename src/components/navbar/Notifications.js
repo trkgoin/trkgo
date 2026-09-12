@@ -70,7 +70,7 @@ const Notifications = () => {
                     anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
                 >
                     <CustomStack>
-                        <Typography sx={{ fontSize: '18px', color: '#EF7822' }}>
+                        <Typography sx={{ fontSize: '18px', color: '#E20074' }}>
                             {t('Notification')}
                         </Typography>
                     </CustomStack>

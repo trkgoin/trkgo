@@ -205,7 +205,7 @@ export const baseThemeOptions = {
             styleOverrides: {
                 root: {
                     '&:hover': {
-                        backgroundColor: 'rgba(239, 120, 34, 0.05)',
+                        backgroundColor: 'rgba(226, 0, 116, 0.05)',
                     },
                 },
             },

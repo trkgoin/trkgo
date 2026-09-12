@@ -37,7 +37,7 @@ export const TrackButton = styled(Button)(({ theme }) => ({
     width: '100%',
     height: '40px',
     background: theme.palette.primary.main,
-    border: '1px solid rgba(239, 120, 34, 0.3)',
+    border: '1px solid rgba(226, 0, 116, 0.3)',
     borderRadius: '5px',
     color: `${theme.palette.whiteContainer.main} !important`,
     gap: '5px',

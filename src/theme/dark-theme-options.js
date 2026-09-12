@@ -13,8 +13,8 @@ const neutral = {
     1000: '#FFFFFF',
     1200: '#e1e6e6',
     1400: 'rgba(56, 52, 52, 0.8)',
-    1500: 'rgba(239, 120, 34, 0.6)',
-    1600: '#EF78224D',
+    1500: 'rgba(226, 0, 116, 0.6)',
+    1600: '#E200744D',
     1700: '#192238',
     1800: '#1C1919',
 }
@@ -54,9 +54,9 @@ const skeletonColorAfter =
     'linear-gradient(78.58deg, #F5F6F8 3.23%, #FDFDFD 53.13%, #F6F7F8 100%)'
 
 const primary = {
-    main: '#FF7918',
+    main: '#E20074',
     light: '#ff6700',
-    dark: '#a3460a',
+    dark: '#A8005A',
     contrastText: neutral[900],
     midPrimary: '#031C3A',
     overLay: '#000000',
@@ -64,10 +64,10 @@ const primary = {
 const paperBoxShadow = '#000000'
 
 const secondary = {
-    main: '#934916',
-    light: '#db5c00',
-    dark: '#a2684c',
-    semiLight: '#FFFAF6',
+    main: '#A8005A',
+    light: '#C10064',
+    dark: '#A8005A',
+    semiLight: '#FFF7FB',
     contrastText: neutral[900],
 }
 
@@ -120,12 +120,12 @@ const pending = {
 }
 const whiteContainer = {
     main: '#F9FAFC',
-    light: '#EF7822',
-    dark: '#ff903f',
-    contrastText: '#EF7822',
+    light: '#E20074',
+    dark: '#FF3D9A',
+    contrastText: '#E20074',
 }
 const customColor = {
-    one: '#FF5E00',
+    one: '#E20074',
     two: '#2B95FF',
     three: '#FF686A',
     four: '#5266D0',
@@ -133,7 +133,7 @@ const customColor = {
     six: '#FFFFFF',
     seven: '#2C1D13',
     eight: '#FFBE0B',
-    nine: '#FB5607',
+    nine: '#FF3D9A',
     ten: '#2c2c2c',
     eleven: '#039D55',
     twelve: '#334257',

@@ -24,7 +24,7 @@ const CouponStartSvg = () => {
                     y2="9.99835"
                     gradientUnits="userSpaceOnUse"
                 >
-                    <stop stopColor="#FF8200" />
+                    <stop stopColor="#E20074" />
                     <stop offset="1" stopColor="#E46E00" />
                 </linearGradient>
             </defs>

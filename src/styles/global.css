@@ -48,8 +48,8 @@ code {
 }
 
 :root {
-    --custom-theme-color: #ef7822;
-    --custom-theme-secondary-color: #ff903f;
+    --custom-theme-color: #E20074;
+    --custom-theme-secondary-color: #FF3D9A;
 }
 
 .App {
@@ -797,7 +797,7 @@ img {
 
 .footer-wrap.sm .footer-top,
 .footer-wrap.sm .footer-middle {
-    background-color: rgba(239, 120, 34, 0.2) !important;
+    background-color: rgba(226, 0, 116, 0.2) !important;
 }
 
 .footer-wrap.sm .footer-bottom {
@@ -854,7 +854,7 @@ img {
 } */
 
 .locationsearch {
-    background: rgba(239, 120, 34, 0.15) !important;
+    background: rgba(226, 0, 116, 0.15) !important;
     border-radius: 0px 5px 5px 0px !important;
     left: 3px;
     width: 56px;
@@ -1107,7 +1107,7 @@ img {
 
 .icon1__btn {
     border-radius: 50px !important;
-    background: #ef7822 !important;
+    background: #E20074 !important;
     width: 40px;
     height: 40px;
 }
@@ -1167,7 +1167,7 @@ img {
 
 .icon__btn {
     border-radius: 50px !important;
-    background-color: rgba(239, 120, 34, 0.6) !important;
+    background-color: rgba(226, 0, 116, 0.6) !important;
     width: 40px;
     height: 40px;
 }
@@ -1282,7 +1282,7 @@ img {
     /*max-width: 200px !important;*/
     /*width: 100% !important;*/
     height: 100%;
-    border: 1px solid rgba(239, 120, 34, 0.3);
+    border: 1px solid rgba(226, 0, 116, 0.3);
     border-radius: 5px;
     object-fit: cover;
 }
@@ -1309,7 +1309,7 @@ img {
 }
 
 .btn__seemore {
-    background: #ef7822 !important;
+    background: #E20074 !important;
     color: white !important;
     border-radius: 5px !important;
     width: 153px;
@@ -1322,7 +1322,7 @@ img {
     font-weight: 700 !important;
     font-size: 26px !important;
     line-height: 32px !important;
-    color: #ef7822;
+    color: #E20074;
 }
 
 .cart__resturant {
@@ -1341,7 +1341,7 @@ img {
     width: 160px;
     height: 36px;
     border-radius: 18px !important;
-    background: #ef7822 !important;
+    background: #E20074 !important;
     color: white !important;
 }
 
@@ -1353,7 +1353,7 @@ img {
 }
 
 /* .loc__button {
-  background-color: rgba(239, 120, 34, 0.1) !important;
+  background-color: rgba(226, 0, 116, 0.1) !important;
 
 } */
 
@@ -1382,8 +1382,8 @@ img {
 .food-carousal-section-wrap .swiper-button-next {
     width: 40px !important;
     height: 40px !important;
-    background: rgba(239, 120, 34, 0.6);
-    border-color: rgba(239, 120, 34, 0.6) !important;
+    background: rgba(226, 0, 116, 0.6);
+    border-color: rgba(226, 0, 116, 0.6) !important;
 }
 
 .food-carousal-section-wrap .swiper-button-prev:after,
@@ -1393,8 +1393,8 @@ img {
 
 /* new card  */
 .card__btn {
-    background: #ef7822 !important;
-    border: 1px solid #ffebdd !important;
+    background: #E20074 !important;
+    border: 1px solid #FDE7F2 !important;
     border-radius: 30px 0px 10px !important;
     color: white !important;
 }
@@ -1404,7 +1404,7 @@ img {
     z-index: 1;
     color: white;
     /* background: red; */
-    background: #ef7822;
+    background: #E20074;
     border-radius: 10px 0px 50px;
     /* width: 80px; */
     /* height: 26px; */
@@ -1424,7 +1424,7 @@ img {
     width: 160px;
     height: 36px;
     border-radius: 20px 0px !important;
-    background: #ef7822 !important;
+    background: #E20074 !important;
     color: white !important;
 }
 
@@ -1449,11 +1449,11 @@ img {
 }
 
 .test-primary {
-    color: #ef7822;
+    color: #E20074;
 }
 
 .css-108h2fo-MuiButtonGroup-root {
-    border: 1px solid #ef7822;
+    border: 1px solid #E20074;
     /* background-color: #fff; */
     border-radius: 9px !important;
 }
@@ -1486,7 +1486,7 @@ h5 {
 
 .restaurant-section .detail-top-section h3 {
     font-size: 20px;
-    color: #ef7822;
+    color: #E20074;
 }
 
 .restaurant-section .detail-top-section p {
@@ -1495,7 +1495,7 @@ h5 {
 
 .restaurant-section .favorite-btn {
     color: #fff;
-    background-color: #ef7822;
+    background-color: #E20074;
     border-radius: 10px;
     margin-left: auto;
     margin-right: auto;
@@ -1506,7 +1506,7 @@ h5 {
 }
 
 .restaurant-section .location-icon {
-    background: rgba(239, 120, 34, 0.1);
+    background: rgba(226, 0, 116, 0.1);
     border-radius: 10px;
     padding: 10px;
 }
@@ -1656,7 +1656,7 @@ h5 {
 
 .selected-btn {
     color: #fff !important;
-    background-color: #ef7822 !important;
+    background-color: #E20074 !important;
 }
 
 .general-btn {
@@ -1686,11 +1686,11 @@ h5 {
 }
 
 .slick-dots li.slick-active button:before {
-    color: #ef7822 !important;
+    color: #E20074 !important;
 }
 
 .slick-dots li button:before {
-    color: #ef7822 !important;
+    color: #E20074 !important;
 }
 
 .scrollbar-hidden::-webkit-scrollbar {

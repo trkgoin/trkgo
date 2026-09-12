@@ -14,7 +14,7 @@ export const StyledFooterBackground = styled(Box)(({ theme, router }) => ({
         width: '480px',
         height: '480px',
         background:
-            'radial-gradient(circle, rgba(255,117,24,.10) 0%, transparent 65%)',
+            'radial-gradient(circle, rgba(226, 0, 116,.10) 0%, transparent 65%)',
         pointerEvents: 'none',
     },
     '&::after': {

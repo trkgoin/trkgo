@@ -62,7 +62,7 @@ export const NavLinkStyle = styled(Stack, {
     const activeBg =
         theme.palette.mode === 'dark'
             ? alpha(theme.palette.primary.main, 0.18)
-            : '#FFF4EC'
+            : '#FEF1F8'
     const inactiveColor =
         theme.palette.mode === 'dark' ? '#fff' : '#334155'
     return {
@@ -105,7 +105,7 @@ export const NavMenuLink = styled(MenuLink)(({ theme }) => ({
         backgroundColor:
             theme.palette.mode === 'dark'
                 ? alpha(theme.palette.primary.main, 0.15)
-                : '#FFF4EC',
+                : '#FEF1F8',
     },
 }))
 export const TopBarButton = styled(Button)(({ theme, formMobileMenu,noLocation }) => ({

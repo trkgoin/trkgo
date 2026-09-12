@@ -20,7 +20,7 @@ const ContactInfo = ({ global }) => {
         width: 30,
         height: 30,
         borderRadius: '9px',
-        background: 'rgba(255,117,24,.1)',
+        background: 'rgba(226, 0, 116,.1)',
         color: theme.palette.primary.main,
         display: 'inline-flex',
         alignItems: 'center',

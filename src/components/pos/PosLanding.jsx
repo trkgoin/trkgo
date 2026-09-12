@@ -315,7 +315,7 @@ const PosLanding = ({ configData }) => {
                                                       '&:hover': {
                                                           color: theme.palette.primary.main,
                                                           borderColor: theme.palette.primary.main,
-                                                          background: 'rgba(239,120,34,.06)',
+                                                          background: 'rgba(226, 0, 116,.06)',
                                                       },
                                                   }),
                                         }}

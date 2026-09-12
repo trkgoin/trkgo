@@ -55,7 +55,7 @@ const FloatingDiscountTag = ({ resDiscount, freeDelivery }) => {
                         content: "''",
                         inset: '0',
                         background:
-                            'linear-gradient(284deg, #FF8200 9.64%, rgba(255, 130, 0, 0.00) 93.09%)',
+                            'linear-gradient(284deg, #E20074 9.64%, rgba(226, 0, 116, 0.00) 93.09%)',
                         borderRadius: '50%',
                         animation: 'App-logo-spin 2s linear infinite',
                     },

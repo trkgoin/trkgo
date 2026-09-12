@@ -38,7 +38,7 @@ const CustomTab = styled('button')(({ theme, active }) => ({
         : theme.palette.neutral[100],
     color: active ? '#fff' : theme.palette.neutral[900],
     boxShadow: active
-        ? '0 4px 12px rgba(255, 121, 24, 0.25)'
+        ? '0 4px 12px rgba(226, 0, 116, 0.25)'
         : 'none',
     transform: active ? 'translateY(-1px)' : 'translateY(0)',
     transition:

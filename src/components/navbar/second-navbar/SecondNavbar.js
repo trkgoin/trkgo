@@ -271,7 +271,7 @@ const SecondNavbar = ({ cartListRefetch }) => {
                         '& .MuiInputBase-root.Mui-focused, & .MuiInputBase-root:focus-within': {
                             borderColor: (theme) =>
                                 theme.palette.primary.main,
-                            boxShadow: '0 0 0 4px rgba(255,117,24,.14)',
+                            boxShadow: '0 0 0 4px rgba(226, 0, 116,.14)',
                         },
                         '& .MuiInputBase-input': {
                             padding: '0 !important',
@@ -295,7 +295,7 @@ const SecondNavbar = ({ cartListRefetch }) => {
                         '& .MuiInputAdornment-positionEnd .MuiIconButton-root': {
                             width: 28,
                             height: 28,
-                            backgroundColor: '#FFF4EC',
+                            backgroundColor: '#FEF1F8',
                             '& .MuiSvgIcon-root': {
                                 color: (theme) => theme.palette.primary.main,
                                 fontSize: '16px',
