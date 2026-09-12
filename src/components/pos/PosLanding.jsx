@@ -296,7 +296,30 @@ const PosLanding = ({ configData }) => {
                                 </Stack>
 
                                 <Link href="/restaurant-registration" style={{ textDecoration: 'none' }}>
-                                    <Button variant={plan.popular ? 'contained' : 'outlined'} fullWidth sx={{ mt: 3, fontWeight: 700 }}>
+                                    {/*
+                                        The colour is set here on purpose: the site theme paints every
+                                        MuiButton label white, which leaves an outlined button reading
+                                        white-on-white - a blank box where "Start free" should be.
+                                    */}
+                                    <Button
+                                        variant={plan.popular ? 'contained' : 'outlined'}
+                                        fullWidth
+                                        sx={{
+                                            mt: 3,
+                                            fontWeight: 700,
+                                            ...(plan.popular
+                                                ? { color: '#fff' }
+                                                : {
+                                                      color: theme.palette.primary.main,
+                                                      borderColor: theme.palette.primary.main,
+                                                      '&:hover': {
+                                                          color: theme.palette.primary.main,
+                                                          borderColor: theme.palette.primary.main,
+                                                          background: 'rgba(239,120,34,.06)',
+                                                      },
+                                                  }),
+                                        }}
+                                    >
                                         {t('Start free')}
                                     </Button>
                                 </Link>
