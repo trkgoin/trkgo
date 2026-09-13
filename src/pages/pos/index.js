@@ -12,7 +12,7 @@ import { processMetadata } from '@/utils/fetchPageMetadata'
  * and the one an owner can reach without a login. manage.trkgo.in is the panel they
  * sign in to afterwards, so it carries no marketing at all.
  */
-const Index = ({ configData, metaData, pathName }) => {
+const Index = ({ configData, metaData, pathName, planSheet }) => {
     const metadata = processMetadata(metaData, {
         title: `Restaurant POS - ${configData?.business_name}`,
         description:
@@ -36,7 +36,7 @@ const Index = ({ configData, metaData, pathName }) => {
                 search engines an empty body. Nothing here touches the browser, so
                 there is nothing to defer.
             */}
-            <PosLanding configData={configData} />
+            <PosLanding configData={configData} planSheet={planSheet} />
         </>
     )
 }
@@ -44,5 +44,28 @@ const Index = ({ configData, metaData, pathName }) => {
 export default Index
 
 export const getServerSideProps = async (context) => {
-    return await getCommonServerSideProps(context, 'restaurant_pos_page')
+    const base = await getCommonServerSideProps(context, 'restaurant_pos_page')
+
+    /*
+     * The feature table comes from the POS itself, not from a copy kept here.
+     * TrkGo edits its plans in the admin panel; this page then cannot promise
+     * something the panel no longer includes. If the call fails the page still
+     * renders - the table is the only thing that goes missing.
+     */
+    let planSheet = null
+
+    try {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/v1/pos-plans`, {
+            headers: { Accept: 'application/json' },
+        })
+
+        if (res.ok) {
+            const json = await res.json()
+            if (json?.ok) planSheet = json
+        }
+    } catch (e) {
+        planSheet = null
+    }
+
+    return { props: { ...base.props, planSheet } }
 }

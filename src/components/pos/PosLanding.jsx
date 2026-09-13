@@ -133,7 +133,77 @@ const FAQ = [
     },
 ]
 
-const PosLanding = ({ configData }) => {
+
+const PLAN_ORDER = ['basic', 'pro', 'advanced']
+
+/**
+ * Green tick only when a restaurant would actually get the thing today. A feature
+ * that is in the plan but not built yet gets the same red cross as one that is not
+ * in the plan at all - the row's tag says which. Promising a tick for something
+ * unbuilt is how a POS loses a restaurant in its second month.
+ */
+const mark = (value, built) => {
+    if (value === 'no' || built === 'soon') {
+        return <Box component="span" sx={{ color: '#F04438', fontWeight: 800, fontSize: '1.05rem' }}>&#10007;</Box>
+    }
+
+    const tick = (
+        <Box component="span" sx={{ color: built === 'part' ? '#F79009' : '#12B76A', fontWeight: 800, fontSize: '1.05rem' }}>
+            &#10003;
+        </Box>
+    )
+
+    if (value === 'basic') {
+        return (
+            <>
+                {tick}
+                <Box component="span" sx={{ fontSize: '.66rem', fontWeight: 700, ml: 0.6, opacity: 0.7 }}>Basic</Box>
+            </>
+        )
+    }
+
+    return tick
+}
+
+const headCell = {
+    textAlign: 'left',
+    fontSize: '.82rem',
+    fontWeight: 800,
+    padding: '10px 12px',
+    borderBottom: '2px solid #E9ECF3',
+}
+
+const groupCell = {
+    background: '#F5F6FA',
+    fontSize: '.7rem',
+    fontWeight: 800,
+    textTransform: 'uppercase',
+    letterSpacing: '.05em',
+    color: '#5B627A',
+    padding: '7px 12px',
+}
+
+const bodyCell = {
+    fontSize: '.84rem',
+    padding: '9px 12px',
+    borderBottom: '1px solid #E9ECF3',
+    verticalAlign: 'top',
+}
+
+const tagSx = {
+    display: 'inline-block',
+    fontSize: '.62rem',
+    fontWeight: 800,
+    textTransform: 'uppercase',
+    letterSpacing: '.04em',
+    background: '#F2F4F7',
+    color: '#667085',
+    borderRadius: '5px',
+    padding: '2px 6px',
+    marginLeft: '6px',
+}
+
+const PosLanding = ({ configData, planSheet }) => {
     const theme = useTheme()
     const { t } = useTranslation()
 
@@ -356,6 +426,76 @@ const PosLanding = ({ configData }) => {
                         {t('Listed here on purpose: these are not working yet, so nobody is promised them today.')}
                     </Typography>
                 </Box>
+
+                {/* ------------------------------------------------ the full sheet */}
+                {planSheet?.rows?.length ? (
+                    <>
+                        <Typography component="h2" sx={{ fontSize: { xs: '1.3rem', md: '1.6rem' }, fontWeight: 800, mt: { xs: 5, md: 7 }, mb: 1 }}>
+                            {t('Every feature, plan by plan')}
+                        </Typography>
+                        <Typography sx={{ color: theme.palette.neutral?.[400] || '#5B627A', fontSize: '.9rem', mb: 2.5 }}>
+                            {t('A green tick means it works today. A red cross means it is not in that plan, or we are still building it - we would rather tell you now.')}
+                        </Typography>
+
+                        <Box sx={{ ...card, p: 0, overflow: 'hidden' }}>
+                            <Box sx={{ overflowX: 'auto' }}>
+                                <Box component="table" sx={{ width: '100%', borderCollapse: 'collapse', minWidth: '560px' }}>
+                                    <Box component="thead">
+                                        <Box component="tr">
+                                            <Box component="th" sx={headCell}>{t('Feature')}</Box>
+                                            {PLAN_ORDER.map((key) => (
+                                                <Box component="th" key={key} sx={{ ...headCell, textAlign: 'center' }}>
+                                                    {planSheet.plans?.[key]?.name || key}
+                                                    <Box component="small" sx={{ display: 'block', fontWeight: 600, fontSize: '.68rem', opacity: 0.65 }}>
+                                                        {planSheet.plans?.[key]?.for || ''}
+                                                    </Box>
+                                                </Box>
+                                            ))}
+                                        </Box>
+                                    </Box>
+                                    <Box component="tbody">
+                                        {Object.keys(planSheet.groups || {}).map((g) => {
+                                            const rows = planSheet.rows.filter((r) => r.group === g)
+                                            if (!rows.length) return null
+
+                                            return (
+                                                <React.Fragment key={g}>
+                                                    <Box component="tr">
+                                                        <Box component="td" colSpan={4} sx={groupCell}>
+                                                            {planSheet.groups[g]}
+                                                        </Box>
+                                                    </Box>
+
+                                                    {rows.map((r) => (
+                                                        <Box component="tr" key={g + r.area}>
+                                                            <Box component="td" sx={bodyCell}>
+                                                                {t(r.area)}
+                                                                {r.built === 'soon' && (
+                                                                    <Box component="span" sx={tagSx}>{t('being built')}</Box>
+                                                                )}
+                                                                {r.built === 'part' && (
+                                                                    <Box component="span" sx={{ ...tagSx, color: '#B54708', background: '#FFFAEB' }}>
+                                                                        {t('partly built')}
+                                                                    </Box>
+                                                                )}
+                                                            </Box>
+
+                                                            {PLAN_ORDER.map((key) => (
+                                                                <Box component="td" key={key} sx={{ ...bodyCell, textAlign: 'center', whiteSpace: 'nowrap' }}>
+                                                                    {mark(r[key], r.built)}
+                                                                </Box>
+                                                            ))}
+                                                        </Box>
+                                                    ))}
+                                                </React.Fragment>
+                                            )
+                                        })}
+                                    </Box>
+                                </Box>
+                            </Box>
+                        </Box>
+                    </>
+                ) : null}
 
                 {/* --------------------------------------------------------- faq */}
                 <Typography component="h2" sx={{ fontSize: { xs: '1.3rem', md: '1.6rem' }, fontWeight: 800, mt: { xs: 5, md: 7 }, mb: 3 }}>
